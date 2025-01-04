@@ -1,4 +1,5 @@
 #include "Player.h"
+#include"Defines.h"
 enum eGolfBallShotStep {
 	SHOT_WAIT,  //  球を打つのを待つ
 	SHOT_KEEP,  //  キー入力開始
@@ -26,12 +27,39 @@ void Player::Update()
 {
     //カメラが設定されていない場合は処理しない
     if (!m_pCamera) { return; }
+    if (IsKeyPress('A'))
+    {
+        m_Rotation.z -= 0.9f;
+    }
+    if (IsKeyPress('D'))
+    {
+        m_Rotation.z += 0.9f;
+    }
+     if (IsKeyPress('W'))
+    {
+        m_Rotation.x -= 0.9f;
+    }
+    if (IsKeyPress('S'))
+    {
+        m_Rotation.x += 0.9f;
+    }
+    float pitch = DirectX::XMConvertToRadians(m_Rotation.x);
+    float yaw = DirectX::XMConvertToRadians(m_Rotation.z);
+    float roll = DirectX::XMConvertToRadians(m_Rotation.y);
 
-    //ボールが停止しているかどうかによって処理を変える  
-    if (m_isStop)
-        UpdateShot(); //球を打つ処理
-    else
-        UpdateMove(); //打った球の移動処理  
+    DirectX::XMMATRIX rotMatrix =
+        DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+    // 行列の z軸方向(row[2]) が forward になる
+    DirectX::XMVECTOR forward = rotMatrix.r[2]; // r[2] は (x, y, z, w)
+    // 移動量
+    DirectX::XMVECTOR moveVec = DirectX::XMVectorScale(forward, 0.01f);
+
+    // 位置を更新
+    DirectX::XMVECTOR posVec = DirectX::XMLoadFloat3(&m_pos);
+    posVec = DirectX::XMVectorAdd(posVec, moveVec);
+    DirectX::XMStoreFloat3(&m_pos, posVec);
+
     m_box.center = m_pos;
 }
 //描画処理
@@ -42,7 +70,10 @@ void Player::Draw()
         DirectX::XMMatrixTranslation(m_pos.x,m_pos.y,m_pos.z);
     DirectX::XMMATRIX S = 
         DirectX::XMMatrixScaling(0.4f,0.4f,0.4f);
-    DirectX::XMMATRIX mat = S * T;
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
+        DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
+        DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
+    DirectX::XMMATRIX mat = S * R * T;
     DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranspose(mat));
     Geometory::SetWorld(world);
 

@@ -4,19 +4,23 @@
 #include "ShaderList.h" 
 #include"EffectM.h"
 #include"DirectX.h"
+#include"Player.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
 EffectM* g_pEffekseerM;
 SceneGame::SceneGame()
 {
-	g_pEffekseerM = new EffectM();
-	g_pEffekseerM->LoadEffect(u"Assets/sakura.efk");//ファイルの読み込みEFK_CHAR*はchar16_t型なので、""前にuをつけて型指定
-	m_pModel = new Model();
-	if (!m_pModel->Load("Assets/riceblock.fbx", 1.0f)) {
-		MessageBox(NULL, "読み込んだファイル名", "Error", MB_OK);     
-	}
+	//g_pEffekseerM = new EffectM();
+	//g_pEffekseerM->LoadEffect(u"Assets/sakura.efk");//ファイルの読み込みEFK_CHAR*はchar16_t型なので、""前にuをつけて型指定
+	//m_pModel = new Model();
+	//if (!m_pModel->Load("Assets/riceblock.fbx", 1.0f)) {
+	//	MessageBox(NULL, "読み込んだファイル名", "Error", MB_OK);     
+	//}
 	m_pCamera = new CameraDebug();
-	g_pEffekseerM->SetCamera(m_pCamera);//カメラ情報を渡す
+	m_pPlayer = new Player();
+	m_pCamera->SetPlayer(m_pPlayer);
+	m_pPlayer->SetCamera(m_pCamera);
+	//g_pEffekseerM->SetCamera(m_pCamera);//カメラ情報を渡す
 
 }
 
@@ -35,13 +39,14 @@ if (m_pCamera) {
 		delete g_pEffekseerM;
 		g_pEffekseerM = nullptr;
 	}
+	SAFE_DELETE(m_pPlayer);
 }
 
 void SceneGame::Update()
 {
 	m_pCamera->Update();
-	g_pEffekseerM->Update();
-
+	//g_pEffekseerM->Update();
+	m_pPlayer->Update();
 }
 
 void SceneGame::Draw()
@@ -140,24 +145,6 @@ void SceneGame::Draw()
 	
 
 
-	//if (b)
-	//{
-
-	//	if (i < 0.502f) 
-	//	{
-	//		Sleep(6000);
-	//		b = false;
-	//	}
-	//}
-	//else
-	//{
-	//	if (i < 1.4f)
-	//	{
-	//		i = sin(rad + 3.14f) * 0.9f + 1.0f;
-	//		j = (sin(rad) * 0.5f + 0.5f) * 0.5f + 1.0f;
-
-	//	}
-	//}
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f,1.0f);
 
 
@@ -180,10 +167,10 @@ void SceneGame::Draw()
 
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
-
+	m_pPlayer->Draw();
 	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
-	m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
-	m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_TOON));
+	//m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
+	//m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_TOON));
 
 	// 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
 	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
@@ -205,5 +192,5 @@ void SceneGame::Draw()
 	//	  //モデルの描画
 	//	m_pModel->Draw(i);
 	//}
-	g_pEffekseerM->Draw();
+	//g_pEffekseerM->Draw();
 }

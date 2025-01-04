@@ -27,6 +27,10 @@ private:
     bool m_isStop;//ボールの停止判定
     int m_shotStep;
     float m_power;
+    float m_moveSpeed; // 移動速度
     Collision::Box m_box;
+    float m_yaw; // Yaw角（水平回転）
+    float m_pitch; // Pitch角（垂直回転）
+    float m_turnSpeed;
 };
 

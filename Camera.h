@@ -23,7 +23,7 @@ protected:
 	DirectX::XMFLOAT3 m_pos;  //  座標
 	DirectX::XMFLOAT3 m_look;  //  注視店
 	DirectX::XMFLOAT3 m_up;  //  上方ベクトル
-	float m_fovy;  //  が書く
+	float m_fovy;  //  
 	float m_aspect; // アスペクト比
 	float m_near;  //  ニアクリップ
 	float m_far;  //  ファークリップ

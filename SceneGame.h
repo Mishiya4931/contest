@@ -14,7 +14,7 @@ public:
 
 private:
 	Model* m_pModel;
-	Camera* m_pCamera;
+	CameraDebug* m_pCamera;
 	Player* m_pPlayer;
 };
 
