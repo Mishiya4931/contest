@@ -38,10 +38,10 @@ void CameraDebug::Update()
 		0.0f
 	);
 
-	//カメラの位置(プレイヤーの後ろ)
+	//カメラの位置(プレイヤーの後ろ)をoffsetBaseに格納
 	XMVECTOR offsetBase = XMVectorSet(0.0f, 1.0f, -m_radius, 0.0f);//x,y,z
 
-	//offsetBase を回転
+	//offsetBase を回転した行列をoffsetrotatedに格納
 	XMVECTOR offsetRotated = XMVector3TransformCoord(offsetBase, rot);
 
 	// 最終的なカメラ座標 = プレイヤー座標 + 回転後オフセット
