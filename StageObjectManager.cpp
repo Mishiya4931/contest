@@ -3,14 +3,24 @@
 #include <random>
 #include"Collision.h"
 #include"Player.h"
-StageObjectManager::StageObjectManager()
+StageObjectManager::StageObjectManager():
+	m_pPlayer(nullptr)
 {
+	if (m_pPlayer)
+	{
+		MessageBox(NULL, "StageObjectManagerにプレイヤーがセットされていません", "エラー", MB_OK);
+	}
 	std::random_device Rd;//メルセンツイスタ関数を使ってランダムにオブジェクトを配置
 	std::mt19937 Gen(Rd());
 	std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
 	std::uniform_real_distribution<float> DistY(0.0f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
 	for (int i = 0; i < 100; i++)
 	{
+		while (Collision::Hit({ {0.0f,0.0f,0.0f}, {0.4f,0.4f,0.4f} }, { {DistXZ(Gen),DistY(Gen),DistXZ(Gen)}, {0.4f,0.4f,0.4f} }).isHit)//スタート位置に出現しないようにする
+		{
+			std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
+			std::uniform_real_distribution<float> DistY(0.0f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
+		}
 		m_StageObjects.push_back(new TrashObject({ DistXZ(Gen),DistY(Gen),DistXZ(Gen) }));//ランダムな座標に領域確保
 	}
 	
