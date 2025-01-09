@@ -6,7 +6,7 @@
 #define MOVE_SPEED_BASE (0.07f)//スピードのベース
 #define MOVE_SPEED_NORMAl (0.0f)//通常のスピード
 #define MOVE_SPEED_DASH (0.05f)//ダッシュのスピード
-#define MOVE_SPEED_SLOW (-0.04f)//減速時のスピード
+#define MOVE_SPEED_SLOW (-0.06f)//減速時のスピード
 #define ROTATION_SPEED_BASE (0.9f)//回転のスピードベース
 #define DASH_TIME (30)//ダッシュする時間
 #define DASH_INTERVAL (120)//ダッシュができるまでの時間
@@ -131,14 +131,10 @@ void Player::UpdateMove()
     }
     //キャラクターの状態変更(基本はNORMAL状態)
     g_eState = NORMAL;
-    if (IsKeyTrigger(VK_SHIFT))//加速
+    if (IsKeyTrigger(VK_SHIFT))//ダッシュフラグを立てる
     {
         m_bDashFlag = true;
         
-    }
-    if (IsKeyPress(VK_SPACE))//減速
-    {
-        g_eState = SLOW;
     }
     if (m_bDashFlag)//ダッシュフラグが立っていたら
     {
@@ -157,6 +153,10 @@ void Player::UpdateMove()
             m_nDashIntervalCnt = 0;//ダッシュフラグを下ろしてカウンタもゼロに
             m_bDashFlag = false;
         }
+    }
+    if (IsKeyPress(VK_SPACE))//減速
+    {
+        g_eState = SLOW;
     }
     switch (g_eState)//プレイヤーの状態によって移動スピードを変える
     {
