@@ -5,10 +5,15 @@
 #include"EffectM.h"
 #include"DirectX.h"
 #include"Player.h"
+#include"StageObjectManager.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
 EffectM* g_pEffekseerM;
-SceneGame::SceneGame()
+SceneGame::SceneGame():
+	m_pCamera(nullptr),
+	m_pModel(nullptr),
+	m_pPlayer(nullptr),
+	m_pStageObjectManager(nullptr)
 {
 	//g_pEffekseerM = new EffectM();
 	//g_pEffekseerM->LoadEffect(u"Assets/sakura.efk");//ファイルの読み込みEFK_CHAR*はchar16_t型なので、""前にuをつけて型指定
@@ -16,8 +21,10 @@ SceneGame::SceneGame()
 	//if (!m_pModel->Load("Assets/riceblock.fbx", 1.0f)) {
 	//	MessageBox(NULL, "読み込んだファイル名", "Error", MB_OK);     
 	//}
+	m_pStageObjectManager = new StageObjectManager();
 	m_pCamera = new CameraDebug();
 	m_pPlayer = new Player();
+	m_pStageObjectManager->SetPlayer(m_pPlayer);
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pPlayer->SetCamera(m_pCamera);
 	//g_pEffekseerM->SetCamera(m_pCamera);//カメラ情報を渡す
@@ -40,10 +47,12 @@ if (m_pCamera) {
 		g_pEffekseerM = nullptr;
 	}
 	SAFE_DELETE(m_pPlayer);
+	SAFE_DELETE(m_pStageObjectManager);
 }
 
 void SceneGame::Update()
 {
+	m_pStageObjectManager->Update();
 	m_pCamera->Update();
 	//g_pEffekseerM->Update();
 	m_pPlayer->Update();
@@ -167,6 +176,7 @@ void SceneGame::Draw()
 
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
+	m_pStageObjectManager->Draw();
 	m_pPlayer->Draw();
 	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
 	//m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));

@@ -14,9 +14,7 @@ public:
     void Draw();
     //カメラの設定
     void SetCamera(Camera* camera) { m_pCamera = camera; }
-    Collision::Box GetCollision() {
-        return m_box;
-    }
+
     void OnCollision();
 private:  
     void UpdateShot();
@@ -28,7 +26,7 @@ private:
     bool m_bDashFlag;//ボールの停止判定
     int m_shotStep;
     float m_power;
-    Collision::Box m_box;
+   
     float m_fDashSpeed;
     int m_nDashIntervalCnt;//ボールの停止判定
 };

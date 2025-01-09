@@ -2,9 +2,12 @@
 #include "GameObject.h"
 class TrashObject :public GameObject
 {
-private:
+public:
 	TrashObject();
+	TrashObject(DirectX::XMFLOAT3 InitPos);
 	~TrashObject();
-
+	void Update()override;
+	void Draw()override;
+private:
 };
 

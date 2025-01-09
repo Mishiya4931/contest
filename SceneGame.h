@@ -4,6 +4,7 @@
 #include"Camera.h"
 #include"CameraDebug.h"
 #include"Player.h"
+class StageObjectManager;
 class SceneGame
 {
 public:
@@ -16,6 +17,7 @@ private:
 	Model* m_pModel;
 	CameraDebug* m_pCamera;
 	Player* m_pPlayer;
+	StageObjectManager* m_pStageObjectManager;
 };
 
 #endif // __SCENE_GAME_H__

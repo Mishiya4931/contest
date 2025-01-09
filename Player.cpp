@@ -29,13 +29,14 @@ Player::Player() :
     m_shotStep(SHOT_WAIT),
     m_power(0.0f),
     m_fDashSpeed(0.0f),
-    m_box({
-        DirectX::XMFLOAT3(0.0f,0.0f,0.0f),
-        DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
-        }),
     m_bDashFlag(false),
     m_nDashIntervalCnt(0)
 {
+    m_box = {
+    DirectX::XMFLOAT3(0.0f,0.0f,0.0f),
+    DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
+    };
+        
 }
 
 Player::~Player()
