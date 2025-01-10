@@ -1,6 +1,6 @@
 #include "Player.h"
 #include"Defines.h"
-
+#include"GaugeUI.h"
 
 //=============定数定義=========================
 #define MOVE_SPEED_BASE (0.07f)//スピードのベース
@@ -8,14 +8,17 @@
 #define MOVE_SPEED_DASH (0.05f)//ダッシュのスピード
 #define MOVE_SPEED_SLOW (-0.06f)//減速時のスピード
 #define ROTATION_SPEED_BASE (0.9f)//回転のスピードベース
-#define DASH_TIME (30)//ダッシュする時間
+#define DASH_TIME (60)//ダッシュする時間
 #define DASH_INTERVAL (120)//ダッシュができるまでの時間
+#define GAUGE_UI_CORRECT (0.0054f)
+
 //============グロ－バル定義====================
 enum eGolfBallShotStep {
 	SHOT_WAIT,  //  球を打つのを待つ
 	SHOT_KEEP,  //  キー入力開始
 	SHOT_RELEASE, //  キー入力をやめた（球を打つ）
 };
+
 enum ePlayerState {//プレイヤーの状態
     NORMAL,//通常
     DASH,//ダッシュ
@@ -30,8 +33,11 @@ Player::Player() :
     m_power(0.0f),
     m_fDashSpeed(0.0f),
     m_bDashFlag(false),
-    m_nDashIntervalCnt(0)
+    m_nDashIntervalCnt(0),
+    m_pGaugeUI(nullptr),
+    m_nGaugeUICnt(DASH_TIME+DASH_INTERVAL)
 {
+    m_pGaugeUI = new GaugeUI();
     m_box = {
     DirectX::XMFLOAT3(0.0f,0.0f,0.0f),
     DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
@@ -41,6 +47,7 @@ Player::Player() :
 
 Player::~Player()
 {
+    SAFE_DELETE(m_pGaugeUI);
 }
 //更新処理
 void Player::Update()
@@ -54,6 +61,7 @@ void Player::Update()
 //描画処理
 void Player::Draw()
 {
+    m_pGaugeUI->Draw();
     DirectX::XMFLOAT4X4 world;
     DirectX::XMMATRIX T = 
         DirectX::XMMatrixTranslation(m_pos.x,m_pos.y,m_pos.z);
@@ -133,13 +141,17 @@ void Player::UpdateMove()
     g_eState = NORMAL;
     if (IsKeyTrigger(VK_SHIFT))//ダッシュフラグを立てる
     {
-        m_bDashFlag = true;
+        if (!m_bDashFlag) {
+            m_bDashFlag = true;
+            m_nGaugeUICnt = 0;
+        }
         
     }
     if (m_bDashFlag)//ダッシュフラグが立っていたら
     {
         
         m_nDashIntervalCnt++;
+        m_nGaugeUICnt++;
         if (m_nDashIntervalCnt < DASH_TIME)//DASH_TIMEの時間分DASH状態になりスピードが上がる
         {
             g_eState = DASH;
@@ -172,8 +184,8 @@ void Player::UpdateMove()
     default:
         break;
     }
-
-
+    m_pGaugeUI->SetGauge(static_cast<float>(m_nGaugeUICnt) * GAUGE_UI_CORRECT);
+    m_pGaugeUI->Update();
     //移動関連の更新
     float pitch = DirectX::XMConvertToRadians(m_Rotation.x);
     float yaw = DirectX::XMConvertToRadians(m_Rotation.z);

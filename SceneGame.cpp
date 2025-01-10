@@ -6,6 +6,7 @@
 #include"DirectX.h"
 #include"Player.h"
 #include"StageObjectManager.h"
+#include"GaugeUI.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
 EffectM* g_pEffekseerM;

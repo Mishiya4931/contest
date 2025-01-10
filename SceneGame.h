@@ -5,6 +5,7 @@
 #include"CameraDebug.h"
 #include"Player.h"
 class StageObjectManager;
+
 class SceneGame
 {
 public:
