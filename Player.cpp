@@ -37,9 +37,10 @@ Player::Player() :
     m_pGaugeUI(nullptr),
     m_nGaugeUICnt(DASH_TIME+DASH_INTERVAL)
 {
+    m_pos = { 0.0f,0.5f,0.0f };
     m_pGaugeUI = new GaugeUI();
     m_box = {
-    DirectX::XMFLOAT3(0.0f,0.0f,0.0f),
+    DirectX::XMFLOAT3(0.0f,0.5f,0.0f),
     DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
     };
         
@@ -121,6 +122,7 @@ void Player::UpdateShot()
 
 void Player::UpdateMove()
 {
+
     if (IsKeyPress('A'))
     {
         m_Rotation.z += -ROTATION_SPEED_BASE;
@@ -197,10 +199,46 @@ void Player::UpdateMove()
     // 行列の z軸方向(row[2]) が forward になる
     DirectX::XMVECTOR forward = rotMatrix.r[2]; // r[2] は (x, y, z, w)
     // 移動量+
+    bool HitWallFlag = false;
     DirectX::XMVECTOR moveVec = DirectX::XMVectorScale(forward, MOVE_SPEED_BASE + m_fDashSpeed);
-
+    if (HitWallFlag)moveVec = DirectX::XMVectorScale(forward, 0.0f);
     DirectX::XMVECTOR posVec = DirectX::XMLoadFloat3(&m_pos);
     // 位置を更新
     posVec = DirectX::XMVectorAdd(posVec, moveVec);
     DirectX::XMStoreFloat3(&m_pos, posVec);
+    OnCollisionWall();
+}
+
+void Player::OnCollisionWall()
+{
+
+    for (auto& itr : m_pWall)
+    {
+        if (Collision::Hit(GetCollision(), itr->GetCollision()).isHit)
+        {
+            switch (itr->GetNo())
+            {
+            case WALL_INNER:
+                m_pos.z = itr->GetPos().z - 0.71f;
+                break;
+            case WALL_UP:
+                m_pos.y = itr->GetPos().y - 0.71f;
+                break;
+            case WALL_LEFT:
+                m_pos.x = itr->GetPos().x + 0.71f;
+                break;
+            case WALL_RIGHT:
+                m_pos.x = itr->GetPos().x - 0.71f;
+                break;
+            case WALL_BACK:
+                m_pos.z = itr->GetPos().z + 0.71f;
+                break;
+            case WALL_DOWN:
+                m_pos.y = itr->GetPos().y + 0.71f;
+                break;
+            default:
+                break;
+            }
+        }
+    }
 }

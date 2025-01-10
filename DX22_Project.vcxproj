@@ -172,6 +172,7 @@
     <ClCompile Include="Startup.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TrashObject.cpp" />
+    <ClCompile Include="Wall.cpp" />
     <ClCompile Include="_geometory.cpp" />
     <ClCompile Include="_model.cpp" />
   </ItemGroup>
@@ -203,6 +204,7 @@
     <ClInclude Include="StageObjectManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TrashObject.h" />
+    <ClInclude Include="Wall.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

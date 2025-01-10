@@ -28,6 +28,7 @@ SceneGame::SceneGame():
 	m_pStageObjectManager->SetPlayer(m_pPlayer);
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pPlayer->SetCamera(m_pCamera);
+	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
 	//g_pEffekseerM->SetCamera(m_pCamera);//ƒJƒƒ‰î•ñ‚ğ“n‚·
 
 }
