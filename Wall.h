@@ -8,6 +8,8 @@
 #define WALL_RIGHT (3)
 #define WALL_BACK  (4)
 #define WALL_DOWN  (5)
+#define WALL_POSITION (10.5f)
+#define WALL_NUM (6)
 class Wall : public GameObject
 {
 public:

@@ -14,11 +14,11 @@
 #define COLLISION_CORRECT (0.001f)
 
 //============グロ－バル定義====================
-enum eGolfBallShotStep {
-	SHOT_WAIT,  //  球を打つのを待つ
-	SHOT_KEEP,  //  キー入力開始
-	SHOT_RELEASE, //  キー入力をやめた（球を打つ）
-};
+//enum eGolfBallShotStep {
+//	SHOT_WAIT,  //  球を打つのを待つ
+//	SHOT_KEEP,  //  キー入力開始
+//	SHOT_RELEASE, //  キー入力をやめた（球を打つ）
+//};
 
 enum ePlayerState {//プレイヤーの状態
     NORMAL,//通常
@@ -29,14 +29,13 @@ ePlayerState g_eState;
 Player::Player() :
     m_pCamera(nullptr),
     m_move(0.0f, 0.0f, 0.0f),
-    m_isStop(false),
-    m_shotStep(SHOT_WAIT),
     m_power(0.0f),
     m_fDashSpeed(0.0f),
-    m_bDashFlag(false),
     m_nDashIntervalCnt(0),
+    m_bDashFlag(false),
     m_pGaugeUI(nullptr),
-    m_nGaugeUICnt(DASH_TIME+DASH_INTERVAL)
+    m_nGaugeUICnt(DASH_TIME+DASH_INTERVAL),
+    m_nItemCnt(0)
 {
     m_pos = { 0.0f,0.5f,0.0f };
     m_pGaugeUI = new GaugeUI();
@@ -79,48 +78,6 @@ void Player::Draw()
     Geometory::SetWorld(world);
 
     Geometory::DrawBox();
-}
-void Player::OnCollision()
-{
-    if (m_move.x > 0.0f)m_move.x = -m_move.x;
-    if (m_move.z > 0.0f)m_move.z = -m_move.z;
-}
-//球を打つ処理
-void Player::UpdateShot()
-{
-    switch (m_shotStep) {
-        //球の打ちはじめ  
-    case SHOT_WAIT:
-        if (IsKeyTrigger('Z')) {
-            m_power = 0.0f;
-            m_shotStep = SHOT_KEEP;
-        }
-        break;
-        //キー入力継続中 
-    case SHOT_KEEP:
-        m_power += 0.1f;  //  
-        if (IsKeyRelease('Z')) {
-            m_shotStep = SHOT_RELEASE;
-        }
-        break;
-        // 球を打つ 
-    case SHOT_RELEASE:
-    {
-        //  打ち出す計算
-        DirectX::XMFLOAT3 camPos = m_pCamera->GetPos();
-        DirectX::XMVECTOR vCamPos = DirectX::XMLoadFloat3(&camPos);
-        DirectX::XMVECTOR vPos = DirectX::XMLoadFloat3(&m_pos);
-        DirectX::XMVECTOR vec = DirectX::XMVectorSubtract(vPos,vCamPos);
-        vec = DirectX::XMVector3Normalize(vec);
-        vec = DirectX::XMVectorScale(vec,m_power);
-        DirectX::XMStoreFloat3(&m_move, vec);
-
-        //  打ち出し後の情報を設定
-        m_isStop = false;   //  移動している
-        m_shotStep = SHOT_WAIT;  //  また再び打つ
-        break;
-    }
-    }
 }
 
 void Player::UpdateMove()

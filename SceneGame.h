@@ -4,9 +4,10 @@
 #include"Camera.h"
 #include"CameraDebug.h"
 #include"Player.h"
+#include"Scene.h"
 class StageObjectManager;
 
-class SceneGame
+class SceneGame :public Scene 
 {
 public:
 	SceneGame();

@@ -20,22 +20,23 @@ public:
     //カメラの設定
     void SetCamera(Camera* camera) { m_pCamera = camera; }
     void SetWall(std::vector <Wall*> InWall) { m_pWall = InWall; }
-    void OnCollision();
+    int GetItemNum() { return m_nItemCnt; }
+    void SetItemNum(int InItemNum) { m_nItemCnt = InItemNum; }
 private:  
-    void UpdateShot();
     void UpdateMove();
     void OnCollisionWall();
 private:
     GaugeUI* m_pGaugeUI;
     Camera* m_pCamera; //カメラ情報
     DirectX::XMFLOAT3 m_move;//移動量
-    bool m_isStop;//ボールの停止判定
-    bool m_bDashFlag;//ボールの停止判定
-    int m_shotStep;
+    //bool m_isStop;//ボールの停止判定
+    //int m_shotStep;
     float m_power;
     std::vector <Wall*> m_pWall;
     float m_fDashSpeed;
+    bool m_bDashFlag;//ダッシュできるかどうか
     int m_nDashIntervalCnt;//ダッシュができるまで時間
     int m_nGaugeUICnt;//ゲージのカウント
+    int m_nItemCnt;
 };
 

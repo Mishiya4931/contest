@@ -58,6 +58,8 @@ void SceneGame::Update()
 	m_pCamera->Update();
 	//g_pEffekseerM->Update();
 	m_pPlayer->Update();
+
+	if (IsKeyTrigger('P'))SetNext(0);//デバッグ
 }
 
 void SceneGame::Draw()

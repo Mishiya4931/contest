@@ -155,6 +155,8 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DirectX.cpp" />
     <ClCompile Include="EffectM.cpp" />
+    <ClCompile Include="Fade.cpp" />
+    <ClCompile Include="FadeBlack.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GaugeUI.cpp" />
     <ClCompile Include="Geometory.cpp" />
@@ -163,6 +165,7 @@
     <ClCompile Include="MeshBuffer.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneGame.cpp" />
     <ClCompile Include="SceneTitle.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -188,6 +191,8 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="EffectM.h" />
+    <ClInclude Include="Fade.h" />
+    <ClInclude Include="FadeBlack.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GaugeUI.h" />
     <ClInclude Include="Geometory.h" />
@@ -196,6 +201,7 @@
     <ClInclude Include="MeshBuffer.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneGame.h" />
     <ClInclude Include="SceneTitle.h" />
     <ClInclude Include="Shader.h" />

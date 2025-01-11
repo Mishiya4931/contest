@@ -25,9 +25,12 @@ public:
 	static void SetView(DirectX::XMFLOAT4X4 view);
 	static void SetProjection(DirectX::XMFLOAT4X4 proj);
 
+	static void SetVP();
+
 	static void SetVertexShader(Shader* vs);
 	static void SetPixelShader(Shader* ps);
-
+	
+	static DirectX::XMMATRIX SetTSR(DirectX::XMFLOAT3 T, DirectX::XMFLOAT3 S = { 1.0f,1.0f,1.0f }, DirectX::XMFLOAT3 R = { 0.0f,0.0f,0.0f });
 private:
 	struct Data
 	{

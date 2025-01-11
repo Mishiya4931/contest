@@ -1,4 +1,6 @@
 #include "Sprite.h"
+#include"Defines.h"
+
 
 Sprite::Data Sprite::m_data;
 std::shared_ptr<VertexShader> Sprite::m_defVS;
@@ -144,6 +146,29 @@ void Sprite::SetProjection(DirectX::XMFLOAT4X4 proj)
 {
 	m_data.matrix[2] = proj;
 }
+void Sprite::SetVP()
+{
+	RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得 
+	DepthStencil* pDSV = GetDefaultDSV(); // 深度バッファの取得 
+	SetRenderTargets(1, &pRTV, nullptr);
+
+	DirectX::XMFLOAT4X4 view, proj;
+	DirectX::XMMATRIX mView =
+		DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(
+			DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),//カメラのポジション
+			DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),	//フォーカスポジション
+			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
+	DirectX::XMStoreFloat4x4(&view, mView);
+	DirectX::XMMATRIX mProj =
+		DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicOffCenterLH(
+			0.0f, (float)SCREEN_WIDTH,
+			(float)SCREEN_HEIGHT, 0.0f,
+			CMETER(30.0f),
+			METER(200.0f)));
+	DirectX::XMStoreFloat4x4(&proj, mProj);
+	Sprite::SetView(view);
+	Sprite::SetProjection(proj);
+}
 void Sprite::SetVertexShader(Shader* vs)
 {
 	if (vs && typeid(VertexShader) == typeid(*vs))
@@ -157,4 +182,15 @@ void Sprite::SetPixelShader(Shader* ps)
 		m_data.ps = ps;
 	else
 		m_data.ps = m_defPS.get();
+}
+
+DirectX::XMMATRIX Sprite::SetTSR(DirectX::XMFLOAT3 T, DirectX::XMFLOAT3 S, DirectX::XMFLOAT3 R)
+{
+	DirectX::XMMATRIX World =	DirectX::XMMatrixTranspose(
+		DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(R.x)) *
+		DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(R.y)) *
+		DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(R.z)) *
+		DirectX::XMMatrixScaling(S.x, S.y, S.z) *
+		DirectX::XMMatrixTranslation(T.x, T.y, T.z));
+	return World;
 }

@@ -5,9 +5,12 @@
 #include "Sprite.h"
 #include "Input.h"
 #include "SceneGame.h"
+#include "SceneTitle.h"
 #include "Defines.h"
 #include "ShaderList.h"
-
+#include"FadeBlack.h"
+Scene* g_pScene; // シーン 
+Fade* g_pFade; // フェード
 //--- グローバル変数
 SceneGame* g_pGame;
 
@@ -17,7 +20,13 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 	// DirectX初期化
 	hr = InitDirectX(hWnd, width, height, false);
 	if (FAILED(hr)) { return hr; }
+	// フェード作成 
+	g_pFade = new FadeBlack();
+	g_pFade->SetFade(1.0f, true);
 
+	// シーン作成 
+	g_pScene = new SceneTitle();
+	g_pScene->SetFade(g_pFade); // シーンに使用するフェードを設定
 	// 他機能初期化
 	Geometory::Init();
 	Sprite::Init();
@@ -25,14 +34,16 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 	ShaderList::Init();
 
 	// シーン作成
-	g_pGame = new SceneGame();
+//	g_pGame = new SceneGame();
 
 	return hr;
 }
 
 void Uninit()
 {
-	delete g_pGame;
+	delete g_pScene;
+	delete g_pFade;
+//	delete g_pGame;
 	ShaderList::Uninit();
 	UninitInput();
 	Sprite::Uninit();
@@ -43,7 +54,27 @@ void Uninit()
 void Update()
 {
 	UpdateInput();
-	g_pGame->Update();
+	g_pScene->RootUpdate();
+
+	// シーン切り替え判定 
+	if (g_pScene->ChangeScene()) {
+		// 次のシーンの情報を取得 
+		int scene = g_pScene->NextScene();
+
+		// 現在のシーンを削除 
+		delete g_pScene;
+
+		// シーンの切り替え 
+		switch (scene) {
+		case 0: g_pScene = new SceneTitle();break; // TITLE 
+		case 1: g_pScene = new SceneGame(); break; // GAME 
+		}
+
+		// 次シーンに向けて初期設定 
+		g_pFade->Start(true);   // フェード開始 
+		g_pScene->SetFade(g_pFade); // フェードクラスをシーンに設定 
+	}
+	/*g_pGame->Update();*/
 }
 
 void Draw()
@@ -110,8 +141,8 @@ void Draw()
 	//Geometory::SetView(mat[0]);
 	//Geometory::SetProjection(mat[1]);
 #endif
-
-	g_pGame->Draw();
+	g_pScene->RootDraw();
+//	g_pGame->Draw();
 	EndDrawDirectX();
 }
 

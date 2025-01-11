@@ -4,7 +4,7 @@
 #include"Collision.h"
 #include"Player.h"
 #include"Wall.h"
-#define WALL_POSITION (10.5f)
+
 StageObjectManager::StageObjectManager():
 	m_pPlayer(nullptr)
 {
@@ -43,7 +43,7 @@ StageObjectManager::StageObjectManager():
 	wallindex[WALL_BACK] = { {0.0f,0.0f,-WALL_POSITION},{0.0f,0.0f,0.0f},{20.0f,20.0f,1.0f} };//手前
 	wallindex[WALL_DOWN] = { {0.0f,-0.5f,0.0f},{0.0f,0.0f,0.0f},{20.0f,1.0f,20.0f} };//下
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < WALL_NUM; i++)
 	{
 		m_WallObjects.push_back(new Wall(wallindex[i].Pos, wallindex[i].Rotation, wallindex[i].Size,i));
 	}
@@ -77,8 +77,12 @@ void StageObjectManager::Update()
 		itr->Update();
 		if (Collision::Hit( itr->GetCollision(), m_pPlayer->GetCollision()).isHit)//プレイヤーとオブジェクトが当たっていたらオブジェクトを消す
 		{
-			delete itr;
-			itr = nullptr;
+			if (m_pPlayer->GetItemNum() < 5)
+			{
+				m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() + 1);
+				delete itr;
+				itr = nullptr;
+			}
 		}
 	}
 	for (auto& itr : m_WallObjects)
