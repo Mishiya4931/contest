@@ -11,6 +11,7 @@
 #define DASH_TIME (60)//ダッシュする時間
 #define DASH_INTERVAL (120)//ダッシュができるまでの時間
 #define GAUGE_UI_CORRECT (0.0054f)
+#define COLLISION_CORRECT (0.001f)
 
 //============グロ－バル定義====================
 enum eGolfBallShotStep {
@@ -58,6 +59,8 @@ void Player::Update()
     UpdateMove();
 
     m_box.center = m_pos;
+    OnCollisionWall();
+
 }
 //描画処理
 void Player::Draw()
@@ -206,7 +209,6 @@ void Player::UpdateMove()
     // 位置を更新
     posVec = DirectX::XMVectorAdd(posVec, moveVec);
     DirectX::XMStoreFloat3(&m_pos, posVec);
-    OnCollisionWall();
 }
 
 void Player::OnCollisionWall()
@@ -214,27 +216,28 @@ void Player::OnCollisionWall()
 
     for (auto& itr : m_pWall)
     {
-        if (Collision::Hit(GetCollision(), itr->GetCollision()).isHit)
+        Collision::Result result = Collision::Hit(GetCollision(), itr->GetCollision());
+        if (result.isHit)
         {
             switch (itr->GetNo())
             {
             case WALL_INNER:
-                m_pos.z = itr->GetPos().z - 0.71f;
+                m_pos.z = itr->GetCollision().center.z + (GetCollision().size.z + itr->GetCollision().size.z + COLLISION_CORRECT) * 0.5f * result.normal.z;
                 break;
             case WALL_UP:
-                m_pos.y = itr->GetPos().y - 0.71f;
+                m_pos.y = itr->GetCollision().center.y + (GetCollision().size.y + itr->GetCollision().size.y + COLLISION_CORRECT) * 0.5f * result.normal.y;
                 break;
             case WALL_LEFT:
-                m_pos.x = itr->GetPos().x + 0.71f;
+                m_pos.x = itr->GetCollision().center.x + (GetCollision().size.x + itr->GetCollision().size.x + COLLISION_CORRECT) * 0.5f * result.normal.x;
                 break;
             case WALL_RIGHT:
-                m_pos.x = itr->GetPos().x - 0.71f;
+                m_pos.x = itr->GetCollision().center.x + (GetCollision().size.x + itr->GetCollision().size.x + COLLISION_CORRECT) * 0.5f* result.normal.x;
                 break;
             case WALL_BACK:
-                m_pos.z = itr->GetPos().z + 0.71f;
+                m_pos.z = itr->GetCollision().center.z + (GetCollision().size.z + itr->GetCollision().size.z + COLLISION_CORRECT) * 0.5f * result.normal.z;
                 break;
             case WALL_DOWN:
-                m_pos.y = itr->GetPos().y + 0.71f;
+                m_pos.y = itr->GetCollision().center.y + (GetCollision().size.y + itr->GetCollision().size.y + COLLISION_CORRECT) * 0.5f * result.normal.y;
                 break;
             default:
                 break;
