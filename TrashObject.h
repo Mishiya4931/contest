@@ -6,7 +6,7 @@ class TrashObject :public GameObject
 {
 public:
 	TrashObject();
-	TrashObject(DirectX::XMFLOAT3 InitPos);
+	TrashObject(DirectX::XMFLOAT3 InitPos,int InitRotation);
 	~TrashObject();
 	void Update()override;
 	void Draw()override;
@@ -14,5 +14,7 @@ public:
 private:
 	Model* m_pModel;
 	CameraDebug* m_pCamera;
+	int m_nRotationFlag;
+	int m_nRotationcnt;
 };
 

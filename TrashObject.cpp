@@ -8,7 +8,7 @@ TrashObject::TrashObject()
 
 }
 
-TrashObject::TrashObject(DirectX::XMFLOAT3 InitPos):GameObject(InitPos),m_pModel(nullptr)
+TrashObject::TrashObject(DirectX::XMFLOAT3 InitPos,int InitRotation) :GameObject(InitPos), m_pModel(nullptr), m_nRotationcnt(0), m_nRotationFlag(InitRotation)
 {
 	m_pModel = ModelCache::GetInstance()->GetCache("Cloud");
     m_box = {
@@ -23,6 +23,22 @@ TrashObject::~TrashObject()
 
 void TrashObject::Update()
 {
+	if (m_nRotationFlag % 2)
+	{
+		m_Rotation.y += 1.0f;
+	}
+	else{
+		m_Rotation.y -= 1.0f;
+	}
+	
+	if (m_Rotation.y> 360.0f)
+	{
+		m_Rotation.y = m_Rotation.y - 360.0f;
+	}
+	if (m_nRotationcnt < 0)
+	{
+		m_Rotation.y = m_Rotation.y + 360.0f;
+	}
 }
 
 void TrashObject::Draw()
@@ -65,7 +81,7 @@ void TrashObject::Draw()
 		//メッシュに割り当てられているマテリアル取得
 		Model::Material material = *m_pModel->GetMaterial(mesh.materialID);
 		//シェーダーへマテリアルを設定
-		material.ambient = { 0.6,0.6,0.6,1.0f };
+		material.ambient = { 0.8f,0.8f,0.8f,1.0f };
 		ShaderList::SetMaterial(material);
 		//モデルの描画
 		m_pModel->Draw(i);

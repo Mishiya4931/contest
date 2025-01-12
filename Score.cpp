@@ -137,7 +137,7 @@ void Score::Draw()
 		Sprite::Draw();
 
 
-		int nScoreCorrect = 100 - m_nScore;
+		int nScoreCorrect = 50 - m_nScore;
 
 
 		//ˆê‚ÌˆÊ

@@ -8,6 +8,7 @@
 #include"ModelCache.h"
 #include"Model.h"
 #include"CameraDebug.h"
+#define STAGE_OBJECT_NUMBER (50)
 StageObjectManager::StageObjectManager():
 	m_pPlayer(nullptr),
 	m_pGoal(nullptr)
@@ -26,14 +27,14 @@ StageObjectManager::StageObjectManager():
 	std::mt19937 Gen(Rd());
 	std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
 	std::uniform_real_distribution<float> DistY(0.3f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < STAGE_OBJECT_NUMBER; i++)
 	{
 		while (Collision::Hit(Collision::Box{ {0.0f,5.0f,0.0f}, {1.5f,1.5f,1.5f} }, { {DistXZ(Gen),DistY(Gen),DistXZ(Gen)}, {1.5f,1.5f,1.5f} }).isHit)//スタート位置に出現しないようにする
 		{
 			std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
 			std::uniform_real_distribution<float> DistY(0.0f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
 		}
-		m_StageObjects.push_back(new TrashObject({ DistXZ(Gen),DistY(Gen),DistXZ(Gen) }));//ランダムな座標に領域確保
+		m_StageObjects.push_back(new TrashObject({ DistXZ(Gen),DistY(Gen),DistXZ(Gen) }, DistY(Gen)));//ランダムな座標に領域確保
 	}
 
 	//=======壁の配置===========
