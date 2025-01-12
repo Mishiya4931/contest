@@ -53,7 +53,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		HWND_DESKTOP,
 		NULL, hInstance, NULL
 	);
-
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	// ウィンドウの表示
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -101,6 +101,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	// 終了時
+	CoUninitialize();
 	timeEndPeriod(1);
 	Uninit();
 	UnregisterClass(wcex.lpszClassName, hInstance);

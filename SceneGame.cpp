@@ -94,6 +94,7 @@ void SceneGame::Update()
 void SceneGame::Draw()
 {
 	m_pPlayer->Draw();
+	m_pStageObjectManager->Draw();
 
 
 	RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得
@@ -165,7 +166,6 @@ void SceneGame::Draw()
 	wvp[2] = m_pCamera->GetProjectionMatrix();
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
-	m_pStageObjectManager->Draw();
 	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
 	//m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
 	//m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_TOON));
