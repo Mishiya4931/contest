@@ -15,8 +15,8 @@
 #define COLLISION_CORRECT (0.001f)
 #define PLAYER_UI_SPRITE_SPRIT_X (5.0f)
 #define PLAYER_UI_SPRITE_SPRIT_Y (2.0f)
-#define PLAYER_UI_SPRITE_POS_X (0.0f)
-#define PLAYER_UI_SPRITE_POS_Y (380.0f)
+#define PLAYER_UI_SPRITE_POS_X (80.0f)
+#define PLAYER_UI_SPRITE_POS_Y (80.0f)
 //============ÉOÉçÅ|ÉoÉãíËã`====================
 //enum eGolfBallShotStep {
 //	SHOT_WAIT,  //  ãÖÇë≈Ç¬ÇÃÇë“Ç¬
@@ -42,7 +42,9 @@ Player::Player() :
     m_nItemCnt(0), m_pModel(nullptr)
 {
     m_pTexture = new Texture();
+    m_pBackTexture = new Texture();
     m_pTexture->Create("Assets/texture/number.png");
+    m_pBackTexture->Create("Assets/texture/CloudUI.png");
     m_pModel = ModelCache::GetInstance()->GetCache("Player");
     m_pModelEquip = ModelCache::GetInstance()->GetCache("PlayerEquip");
     m_pos = { 0.0f,0.5f,0.0f };
@@ -58,6 +60,7 @@ Player::~Player()
 {
     SAFE_DELETE(m_pGaugeUI);
     SAFE_DELETE(m_pTexture);
+    SAFE_DELETE(m_pBackTexture);
 }
 //çXêVèàóù
 void Player::Update()
@@ -256,12 +259,25 @@ void Player::DrawUI()
     DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(mProj));
     Sprite::SetView(view);
     Sprite::SetProjection(proj);
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(PLAYER_UI_SPRITE_POS_X, PLAYER_UI_SPRITE_POS_Y, 0.0f);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.2f, -1.2f, 1.0f);// Yè„â∫îΩì]
+    DirectX::XMMATRIX mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+    mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+    DirectX::XMStoreFloat4x4(&world, mWorld);
+    Sprite::SetWorld(world);
+    Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+    Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+    Sprite::SetUVPos({0.0f,0.0f});
+    Sprite::SetUVScale({ 1.0f,1.0f});
+    Sprite::SetTexture(m_pBackTexture);
+    Sprite::SetColor({ 1.0f, 1.0f/ (static_cast<float>(m_nItemCnt+1.0f)*0.6f), 1.0f / (static_cast<float>(m_nItemCnt + 1.0f) * 0.6f), 1.0f });
+    Sprite::Draw();  
 
     //àÍÇÃà 
     int one = m_nItemCnt % 10;
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(PLAYER_UI_SPRITE_POS_X, PLAYER_UI_SPRITE_POS_Y, 0.0f);
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
-    DirectX::XMMATRIX mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+    T = DirectX::XMMatrixTranslation(PLAYER_UI_SPRITE_POS_X-5.0f, PLAYER_UI_SPRITE_POS_Y+12.0f, 0.0f);
+    S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+    mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
     mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
     DirectX::XMStoreFloat4x4(&world, mWorld);
     Sprite::SetWorld(world);

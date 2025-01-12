@@ -35,6 +35,7 @@ private:
     Camera* m_pCamera; //ƒJƒƒ‰î•ñ
     DirectX::XMFLOAT3 m_move;//ˆÚ“®—Ê
     Texture* m_pTexture;
+    Texture* m_pBackTexture;
     //bool m_isStop;//ƒ{[ƒ‹‚Ì’â~”»’è
     //int m_shotStep;
     float m_power;
