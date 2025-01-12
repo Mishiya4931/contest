@@ -1,5 +1,6 @@
 #pragma once
 #include"Scene.h"
+#include"Texture.h"
 class CameraResult;
 class SceneResult:public Scene
 {
@@ -10,5 +11,6 @@ public:
 	void Draw();
 private:
 	CameraResult* m_pCamera;
+	Texture* m_pTexture;
 };
 

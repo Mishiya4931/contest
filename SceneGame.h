@@ -5,6 +5,7 @@
 #include"CameraDebug.h"
 #include"Player.h"
 #include"Scene.h"
+#include"Texture.h"
 class StageObjectManager;
 
 class SceneGame :public Scene 
@@ -20,6 +21,10 @@ private:
 	CameraDebug* m_pCamera;
 	Player* m_pPlayer;
 	StageObjectManager* m_pStageObjectManager;
+	Texture* m_pTexture;
+	int StartTimer;
+	int Framecnt;
+	bool StartFlag;
 };
 
 #endif // __SCENE_GAME_H__

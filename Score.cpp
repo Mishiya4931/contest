@@ -2,7 +2,10 @@
 #include"Texture.h"
 #include"Sprite.h"
 #include"Defines.h"
+#include<random>
 Score* Score::Instanse;
+bool Score::m_bResultFlg;
+int Score::cnt;
 #define SCORE_SPRITE_SPRIT_X (5.0f)
 #define SCORE_SPRITE_SPRIT_Y (2.0f)
 #define SCORE_SPRITE_POS_X (740.0f)
@@ -10,14 +13,28 @@ Score* Score::Instanse;
 Score::Score():m_pTexture(nullptr)
 {
 	m_nScore = 0;
+	cnt = 0;
 	Instanse = nullptr;
 	m_pTexture = new Texture();
 	m_pTexture->Create("Assets/texture/number.png");
+	m_pScoreTexture = new Texture();
+	m_pScoreTexture->Create("Assets/texture/ScoreTexture.png");
+	m_pScore1 = new Texture();
+	m_pScore1->Create("Assets/texture/Score1.png");
+	m_pScore2 = new Texture();
+	m_pScore2->Create("Assets/texture/Score2.png");
+	m_pScore3 = new Texture();
+	m_pScore3->Create("Assets/texture/Score3.png");
+	m_bResultFlg = false;
 }
 
 Score::~Score()
 {
 	SAFE_DELETE(m_pTexture);
+	SAFE_DELETE(m_pScoreTexture);
+	SAFE_DELETE(m_pScore1);
+	SAFE_DELETE(m_pScore2);
+	SAFE_DELETE(m_pScore3);
 }
 
 void Score::Init()
@@ -39,8 +56,20 @@ void Score::Uninit()
 	}
 }
 
+void Score::Reset()
+{
+	m_bResultFlg = false;
+	cnt = 0;
+}
+
 void Score::Update()
 {
+	
+	if (cnt > 120)
+	{
+		m_bResultFlg = true;
+	}
+	cnt++;
 }
 
 void Score::Draw()
@@ -62,52 +91,158 @@ void Score::Draw()
 	DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(mProj));
 	Sprite::SetView(view);
 	Sprite::SetProjection(proj);
+		DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(640.0f, 150.0f, 0.0f);
+		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		DirectX::XMMATRIX mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 1080.0f, 320.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 0.0f,0.0f });
+		Sprite::SetUVScale({ 1.0f,1.0f });
+		Sprite::SetTexture(m_pScoreTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
 
-	//àÍÇÃà 
-	int one = m_nScore % 10;
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X, SCORE_SPRITE_POS_Y, 0.0f);
-	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
-	DirectX::XMMATRIX mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
-	mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
-	DirectX::XMStoreFloat4x4(&world, mWorld);
-	Sprite::SetWorld(world);
-	Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
-	Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
-	Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (one % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (one / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
-	Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
-	Sprite::SetTexture(m_pTexture);
-	Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	Sprite::Draw();
 
-	//è\ÇÃà 
-	int ten = m_nScore / 10;
-	T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X-110.0f, SCORE_SPRITE_POS_Y, 0.0f);
-	S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
-	mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
-	mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
-	DirectX::XMStoreFloat4x4(&world, mWorld);
-	Sprite::SetWorld(world);
-	Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
-	Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
-	Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (ten % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (ten / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
-	Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
-	Sprite::SetTexture(m_pTexture);
-	Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	Sprite::Draw();	
 
-	//ïSÇÃà 
-	int tho = m_nScore / 100;
-	T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X-220.0f, SCORE_SPRITE_POS_Y, 0.0f);
-	S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
-	mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
-	mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
-	DirectX::XMStoreFloat4x4(&world, mWorld);
-	Sprite::SetWorld(world);
-	Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
-	Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
-	Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (tho % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (tho / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
-	Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
-	Sprite::SetTexture(m_pTexture);
-	Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	Sprite::Draw();
+
+
+	if (m_bResultFlg) {
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X - 100.0f, SCORE_SPRITE_POS_Y + 200.0f, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 500.0f, 320.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 0.0f,0.0f });
+		Sprite::SetUVScale({ 1.0f,1.0f });
+		if (m_nScore > 40)
+		{
+			Sprite::SetTexture(m_pScore3);
+		}
+		else if (m_nScore > 30)
+		{
+			Sprite::SetTexture(m_pScore2);
+		}
+		else if (m_nScore > 0)
+		{
+			Sprite::SetTexture(m_pScore1);
+		}
+
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+
+		int nScoreCorrect = 100 - m_nScore;
+
+
+		//àÍÇÃà 
+		int one = nScoreCorrect % 10;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (one % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (one / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+		//è\ÇÃà 
+		int ten = nScoreCorrect / 10;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X - 110.0f, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (ten % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (ten / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+		//ïSÇÃà 
+		int tho = nScoreCorrect / 100;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X - 220.0f, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (tho % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (tho / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+	}
+	else
+	{
+		std::random_device Rd;//ÉÅÉãÉZÉìÉcÉCÉXÉ^ä÷êî
+		std::mt19937 Gen(Rd());
+		std::uniform_int_distribution<int> Dist(0, 100);
+		//àÍÇÃà 
+		int rnd = Dist(Gen);
+		int one = rnd % 10;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (one % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (one / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+		//è\ÇÃà 
+		int ten = rnd / 10;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X - 110.0f, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (ten % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (ten / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+		//ïSÇÃà 
+		int tho = rnd / 100;
+		T = DirectX::XMMatrixTranslation(SCORE_SPRITE_POS_X - 220.0f, SCORE_SPRITE_POS_Y, 0.0f);
+		S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Yè„â∫îΩì]
+		mWorld = S * T;// ägèkÅ®âÒì]Å®à⁄ìÆ
+		mWorld = DirectX::XMMatrixTranspose(mWorld);// ì]íu
+		DirectX::XMStoreFloat4x4(&world, mWorld);
+		Sprite::SetWorld(world);
+		Sprite::SetSize({ 160.0f, 160.0f }); //Å@ÉTÉCÉY
+		Sprite::SetOffset({ 0.0f, 0.0f });// ç¿ïW
+		Sprite::SetUVPos({ 1.0f / SCORE_SPRITE_SPRIT_X * (tho % static_cast<int>(SCORE_SPRITE_SPRIT_X)),1.0f / SCORE_SPRITE_SPRIT_Y * (tho / static_cast<int>(SCORE_SPRITE_SPRIT_X)) });
+		Sprite::SetUVScale({ 1.0f / SCORE_SPRITE_SPRIT_X,1.0f / SCORE_SPRITE_SPRIT_Y });
+		Sprite::SetTexture(m_pTexture);
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Sprite::Draw();
+
+
+
+	}
 }

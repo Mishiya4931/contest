@@ -22,7 +22,7 @@ StageObjectManager::StageObjectManager():
 	
 
 	//=======オブジェクトの配置========
-	std::random_device Rd;//メルセンツイスタ関数を使ってランダムにオブジェクトを配置
+	std::random_device Rd;//メルセンヌツイスタ関数を使ってランダムにオブジェクトを配置
 	std::mt19937 Gen(Rd());
 	std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
 	std::uniform_real_distribution<float> DistY(0.3f, 10.0f); //Y方向は - 10.0f～10.0fの範囲

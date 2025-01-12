@@ -12,20 +12,22 @@
 #include"CameraDebug.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
+#define TIMER_SPRITE_SPRIT_X (5.0f)
+#define TIMER_SPRITE_SPRIT_Y (2.0f)
+
 EffectM* g_pEffekseerM;
 Timer* g_pTimer;
-SceneGame::SceneGame():
+SceneGame::SceneGame() :
 	m_pCamera(nullptr),
 	m_pModel(nullptr),
 	m_pPlayer(nullptr),
-	m_pStageObjectManager(nullptr)
+	m_pStageObjectManager(nullptr),
+	StartFlag(false),
+	Framecnt(0),
+	StartTimer(3)
 {
-	//g_pEffekseerM = new EffectM();
-	//g_pEffekseerM->LoadEffect(u"Assets/sakura.efk");//ファイルの読み込みEFK_CHAR*はchar16_t型なので、""前にuをつけて型指定
-	//m_pModel = new Model();
-	//if (!m_pModel->Load("Assets/riceblock.fbx", 1.0f)) {
-	//	MessageBox(NULL, "読み込んだファイル名", "Error", MB_OK);     
-	//}
+	m_pTexture = new Texture();
+	m_pTexture->Create("Assets/texture/number.png");
 	m_pStageObjectManager = new StageObjectManager();
 	m_pCamera = new CameraDebug();
 	m_pPlayer = new Player();
@@ -34,7 +36,6 @@ SceneGame::SceneGame():
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pPlayer->SetCamera(m_pCamera);
 	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
-	//g_pEffekseerM->SetCamera(m_pCamera);//カメラ情報を渡す
 	g_pTimer = new Timer();
 }
 
@@ -56,120 +57,96 @@ if (m_pCamera) {
 	SAFE_DELETE(m_pPlayer);
 	SAFE_DELETE(m_pStageObjectManager);
 	SAFE_DELETE(g_pTimer);
+	SAFE_DELETE(m_pTexture);
 }
 
 void SceneGame::Update()
 {
-	m_pStageObjectManager->Update();
-	m_pCamera->Update();
-	//g_pEffekseerM->Update();
-	m_pPlayer->Update();
-	g_pTimer->Update();
-	if (g_pTimer->GetTime() < 1) { 
-		Score::GetInstanse()->SetScore(m_pStageObjectManager->GetStageObjectCnt());
-		SetNext(2); 
-	}//デバッグ
+
+
+		m_pCamera->Update();
+	if (StartFlag)
+	{
+		m_pStageObjectManager->Update();
+		//g_pEffekseerM->Update();
+		m_pPlayer->Update();
+		g_pTimer->Update();
+		if (g_pTimer->GetTime() < 1) {
+			Score::GetInstanse()->SetScore(m_pStageObjectManager->GetStageObjectCnt());
+			SetNext(2);
+		}//デバッグ
+	}
+	else
+	{
+		if (Framecnt > 60)
+		{
+			StartTimer--;
+			Framecnt = 0;
+		}
+		if (StartTimer < 1)
+		{
+			StartFlag = true;
+		}
+		Framecnt++;
+	}
 }
 
 void SceneGame::Draw()
 {
+	m_pPlayer->Draw();
 
-	RenderTarget* pRTV = GetDefaultRTV(); // RenderTargetView 
-	DepthStencil* pDSV = GetDefaultDSV(); // DepthStencilView 
+
+	RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得
+	DepthStencil* pDSV = GetDefaultDSV(); // 深度バッファの取得
+	// 2D表示の設定 
+	SetRenderTargets(1, &pRTV, nullptr);
+	// スプライトの表示に必要な行列を計算 
+	DirectX::XMFLOAT4X4 world4x4, view4x4, proj4x4;
+	DirectX::XMMATRIX mView =
+		DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),
+			DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+		);
+	DirectX::XMMATRIX mProj = DirectX::XMMatrixOrthographicOffCenterLH(
+		0.0f, static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 0.0f, CMETER(30.0f), METER(2.0f));
+	DirectX::XMStoreFloat4x4(&view4x4, DirectX::XMMatrixTranspose(mView));
+	DirectX::XMStoreFloat4x4(&proj4x4, DirectX::XMMatrixTranspose(mProj));
+	Sprite::SetView(view4x4);
+	Sprite::SetProjection(proj4x4);
+	//=======タイマー1の位====
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(SCREEN_WIDTH/2,SCREEN_HEIGHT/2, 0.0f);
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Y上下反転
+	DirectX::XMMATRIX mWorld = S * T;// 拡縮→回転→移動
+	mWorld = DirectX::XMMatrixTranspose(mWorld);// 転置
+	DirectX::XMStoreFloat4x4(&world4x4, mWorld);
+	Sprite::SetWorld(world4x4);
+	Sprite::SetSize({ 160.0f, 160.0f }); //　サイズ
+	Sprite::SetOffset({ 0.0f, 0.0f });// 座標
+	int one = StartTimer % 10;
+	Sprite::SetUVPos({ 1.0f / TIMER_SPRITE_SPRIT_X * (one % static_cast<int>(TIMER_SPRITE_SPRIT_X)),1.0f / TIMER_SPRITE_SPRIT_Y * (one / static_cast<int>(TIMER_SPRITE_SPRIT_X)) });
+	Sprite::SetUVScale({ 1.0f / TIMER_SPRITE_SPRIT_X,1.0f / TIMER_SPRITE_SPRIT_Y });
+	Sprite::SetTexture(m_pTexture);
+	Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	if (!StartFlag) {
+		Sprite::Draw();
+	}
+
+
+
+
+
+
+
+
+
+	pRTV = GetDefaultRTV(); // RenderTargetView 
+	pDSV = GetDefaultDSV(); // DepthStencilView 
 	SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
 	Geometory::SetView(m_pCamera->GetViewMatrix());
 	Geometory::SetProjection(m_pCamera->GetProjectionMatrix());
-	//
-	////g_pEffekseerM->Draw();
-	////********************ボックス回転**********************
-	////static float rad = 0.0f;
-	////DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(ANGLE(rad));//X軸回転行列;
-	////DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(ANGLE(rad));//Y軸回転行列;
-	////DirectX::XMMATRIX Rz = DirectX::XMMatrixRotationZ(ANGLE(rad));//Z軸回転行列;
-	////DirectX::XMMATRIX mat = Rx * Ry * Rz; // それぞれの行列を掛け合わせて格納 
-	////mat = DirectX::XMMatrixTranspose(mat);
-	////DirectX::XMFLOAT4X4 fMat; // 行列の格納先 
-	////DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	////Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	////rad += 1.0f;//回転角の更新(速度はお任せ);
-	////Geometory::DrawBox();
-	//// ****************************************************
-	////********************ボックス配置********************** 
-	////--- １つ目の地面 
-	//DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(-2.0f,-2.0f,0.0f);   // 天面がグリッドよりも下に来るように移動 
-	//DirectX::XMMATRIX S = DirectX::XMMatrixScaling(5.0f,0.1,10.0f); // 地面となるように、前後左右に広く、上下に狭くする 
-
-	//DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(ANGLE(0.0f)) *
-	//					  DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
-	//					  DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
-	//DirectX::XMMATRIX mat = S * R * T;//それぞれの行列を掛け合わせて格納;
-	//mat = DirectX::XMMatrixTranspose(mat);//CPUからGPUに行列を送る前に実行する処理;
-	//DirectX::XMFLOAT4X4 fMat; // 行列の格納先 
-	//DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	//Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	//Geometory::DrawBox();
-
-	////--- 2つ目の地面 
-	//T = DirectX::XMMatrixTranslation(2.0f, 2.5f, 8.0f);  
-	//S = DirectX::XMMatrixScaling(5.0f, 0.1, 5.0f);
-	//R = DirectX::XMMatrixRotationX(ANGLE(0.0f)) *
-	//    DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
-	//	DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
-
- //   mat = S * R *T;//それぞれの行列を掛け合わせて格納;
-	//mat = DirectX::XMMatrixTranspose(mat);//CPUからGPUに行列を送る前に実行する処理;
- //   fMat; // 行列の格納先 
-	//DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	//Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	//Geometory::DrawBox();
-	////--- 3つ目の地面 
-	//T = DirectX::XMMatrixTranslation(0.0f, 1.0f, 4.1f);  
-	//S = DirectX::XMMatrixScaling(5.0f, 0.1, 5.0f);
-	//R = DirectX::XMMatrixRotationX(ANGLE(-30.0f)) *
-	//    DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
-	//	DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
-
- //   mat = S * R *T;//それぞれの行列を掛け合わせて格納;
-	//mat = DirectX::XMMatrixTranspose(mat);//CPUからGPUに行列を送る前に実行する処理;
- //   fMat; // 行列の格納先 
-	//DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	//Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	//Geometory::DrawBox();
-	////--- 4つ目の地面 
-	//T = DirectX::XMMatrixTranslation(4.0f, 2.0f, 15.0f);  
-	//S = DirectX::XMMatrixScaling(5.0f, 0.1, 5.0f);
-	//R = DirectX::XMMatrixRotationX(ANGLE(-30.0f)) *
-	//    DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
-	//	DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
-
- //   mat = S * R *T;//それぞれの行列を掛け合わせて格納;
-	//mat = DirectX::XMMatrixTranspose(mat);//CPUからGPUに行列を送る前に実行する処理;
- //   fMat; // 行列の格納先 
-	//DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	//Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	//Geometory::DrawBox();
-	////*****************************************************
-	//T = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	//S = DirectX::XMMatrixScaling(1.0f, 1.0, 1.0f);
-	//R = DirectX::XMMatrixRotationX(ANGLE(0.0f)) *
-	//	DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
-	//	DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
-	//mat = S * R * T;//それぞれの行列を掛け合わせて格納;
-	//mat = DirectX::XMMatrixTranspose(mat);//CPUからGPUに行列を送る前に実行する処理;
-	//fMat; // 行列の格納先 
-	//DirectX::XMStoreFloat4x4(&fMat, mat);//MatをfMatに格納する処理;
-	//Geometory::SetWorld(fMat); // ボックスに変換行列を設定 
-	////===================================
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-
-
-
 	
-
-
-	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f,1.0f);
-
-
+	T = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	S = DirectX::XMMatrixScaling(1.0f, 1.0f,1.0f);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(ANGLE(0.0f)) *
 		DirectX::XMMatrixRotationY(ANGLE(0.0f)) *
 		DirectX::XMMatrixRotationZ(ANGLE(0.0f)); // 回転
@@ -189,7 +166,6 @@ void SceneGame::Draw()
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
 	m_pStageObjectManager->Draw();
-	m_pPlayer->Draw();
 	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
 	//m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
 	//m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_TOON));
@@ -197,23 +173,5 @@ void SceneGame::Draw()
 	// 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
 	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
 	// 切り替える。
-
-	//  
-	//  
-
-
-
-	//for (int i = 0; i < m_pModel->GetMeshNum(); ++i) {
-	//	  //モデルのメッシュを取得
-	//	Model::Mesh mesh = *m_pModel->GetMesh(i);
-	//	  //メッシュに割り当てられているマテリアル取得
-	//	Model::Material material = *m_pModel->GetMaterial(mesh.materialID);
-	//	  //シェーダーへマテリアルを設定
-	//	material.ambient = { 0.6,0.6,0.6,1.0f };
-	//	ShaderList::SetMaterial(material);
-	//	  //モデルの描画
-	//	m_pModel->Draw(i);
-	//}
-	//g_pEffekseerM->Draw();
 	g_pTimer->Draw();
 }
