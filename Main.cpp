@@ -6,13 +6,17 @@
 #include "Input.h"
 #include "SceneGame.h"
 #include "SceneTitle.h"
+#include "SceneResult.h"
 #include "Defines.h"
 #include "ShaderList.h"
 #include"FadeBlack.h"
+#include"Score.h"
+#include"ModelCache.h"
 Scene* g_pScene; // シーン 
 Fade* g_pFade; // フェード
 //--- グローバル変数
 SceneGame* g_pGame;
+
 
 HRESULT Init(HWND hWnd, UINT width, UINT height)
 {
@@ -23,7 +27,6 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 	// フェード作成 
 	g_pFade = new FadeBlack();
 	g_pFade->SetFade(1.0f, true);
-
 	// シーン作成 
 	g_pScene = new SceneTitle();
 	g_pScene->SetFade(g_pFade); // シーンに使用するフェードを設定
@@ -32,8 +35,10 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 	Sprite::Init();
 	InitInput();
 	ShaderList::Init();
-
+	Score::Init();
+	ModelCache::Init();
 	// シーン作成
+	ModelLoad();
 //	g_pGame = new SceneGame();
 
 	return hr;
@@ -44,6 +49,8 @@ void Uninit()
 	delete g_pScene;
 	delete g_pFade;
 //	delete g_pGame;
+	ModelCache::UnInit();
+	Score::Uninit();
 	ShaderList::Uninit();
 	UninitInput();
 	Sprite::Uninit();
@@ -68,6 +75,7 @@ void Update()
 		switch (scene) {
 		case 0: g_pScene = new SceneTitle();break; // TITLE 
 		case 1: g_pScene = new SceneGame(); break; // GAME 
+		case 2: g_pScene = new SceneResult(); break;//RESULT
 		}
 
 		// 次シーンに向けて初期設定 
@@ -144,6 +152,14 @@ void Draw()
 	g_pScene->RootDraw();
 //	g_pGame->Draw();
 	EndDrawDirectX();
+}
+
+void ModelLoad()
+{
+	ModelCache::GetInstance()->GetCache("Player")->Load("Assets/model/a.fbx",0.015f);
+	ModelCache::GetInstance()->GetCache("PlayerEquip")->Load("Assets/model/無題.fbx",1.5f);
+	ModelCache::GetInstance()->GetCache("PlayerEquip")->AddAnimation("Assets/model/無題.fbx");
+	ModelCache::GetInstance()->GetCache("Cloud")->Load("Assets/model/cloud.fbx",0.2f);
 }
 
 // EOF

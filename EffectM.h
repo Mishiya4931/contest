@@ -2,7 +2,7 @@
 #include"EffekseerRendererDX11.h"
 #include"Effekseer.h"
 #include"DirectX.h"
-#include"Camera.h";
+#include"Camera.h"
 class EffectM
 {
 public:

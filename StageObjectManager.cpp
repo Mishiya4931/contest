@@ -4,14 +4,22 @@
 #include"Collision.h"
 #include"Player.h"
 #include"Wall.h"
-
+#include"Goal.h"
+#include"ModelCache.h"
+#include"Model.h"
+#include"CameraDebug.h"
 StageObjectManager::StageObjectManager():
-	m_pPlayer(nullptr)
+	m_pPlayer(nullptr),
+	m_pGoal(nullptr)
 {
 	if (m_pPlayer)
 	{
 		MessageBox(NULL, "StageObjectManagerにプレイヤーがセットされていません", "エラー", MB_OK);
 	}
+	
+	//=====ゴールの配置==========
+	m_pGoal = new Goal({ 0.0f, 5.0f, 0.0f });
+	
 
 	//=======オブジェクトの配置========
 	std::random_device Rd;//メルセンツイスタ関数を使ってランダムにオブジェクトを配置
@@ -20,15 +28,15 @@ StageObjectManager::StageObjectManager():
 	std::uniform_real_distribution<float> DistY(0.3f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
 	for (int i = 0; i < 100; i++)
 	{
-		while (Collision::Hit(Collision::Box{ {0.0f,0.0f,0.0f}, {0.4f,0.4f,0.4f} }, { {DistXZ(Gen),DistY(Gen),DistXZ(Gen)}, {0.4f,0.4f,0.4f} }).isHit)//スタート位置に出現しないようにする
+		while (Collision::Hit(Collision::Box{ {0.0f,5.0f,0.0f}, {1.5f,1.5f,1.5f} }, { {DistXZ(Gen),DistY(Gen),DistXZ(Gen)}, {1.5f,1.5f,1.5f} }).isHit)//スタート位置に出現しないようにする
 		{
 			std::uniform_real_distribution<float> DistXZ(-10.0f, 10.0f);//XZ方向は-10.0f～10.0fの範囲
 			std::uniform_real_distribution<float> DistY(0.0f, 10.0f); //Y方向は - 10.0f～10.0fの範囲
 		}
 		m_StageObjects.push_back(new TrashObject({ DistXZ(Gen),DistY(Gen),DistXZ(Gen) }));//ランダムな座標に領域確保
 	}
-	//=======壁の配置===========
 
+	//=======壁の配置===========
 	struct WallIndex//壁の位置、回転、サイズの情報
 	{
 		DirectX::XMFLOAT3 Pos;
@@ -67,29 +75,40 @@ StageObjectManager::~StageObjectManager()
 		itr = nullptr;
 	}
 	m_WallObjects.clear();
+	SAFE_DELETE(m_pGoal);
 }
 
 void StageObjectManager::Update()
 {
-	for (auto& itr : m_StageObjects)
+	m_pGoal->SetPlayer(m_pPlayer);
+	for (auto itr = m_StageObjects.begin(); itr != m_StageObjects.end(); )
 	{
-		if (!itr)continue;//オブジェクトがあるかどうかチェック
-		itr->Update();
-		if (Collision::Hit( itr->GetCollision(), m_pPlayer->GetCollision()).isHit)//プレイヤーとオブジェクトが当たっていたらオブジェクトを消す
-		{
-			if (m_pPlayer->GetItemNum() < 5)
-			{
+		if (!(*itr)) {
+			++itr; // nullptrの場合はスキップ
+			continue;
+		}
+
+		(*itr)->Update();
+
+		if (Collision::Hit((*itr)->GetCollision(), m_pPlayer->GetCollision()).isHit) {
+			// プレイヤーとオブジェクトが当たった場合
+			if (m_pPlayer->GetItemNum() < 5) {
 				m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() + 1);
-				delete itr;
-				itr = nullptr;
+
+				// 現在の要素を削除し、イテレーターを次に進める
+				itr = m_StageObjects.erase(itr);
+				continue; // erase後に++itrを呼ばない
 			}
 		}
+
+		++itr; // 通常時は次の要素に進む
 	}
 	for (auto& itr : m_WallObjects)
 	{
 		if (!itr)continue;//オブジェクトがあるかどうかチェック
 		itr->Update();
 	}
+	m_pGoal->Update();
 }
 
 void StageObjectManager::Draw()
@@ -104,4 +123,16 @@ void StageObjectManager::Draw()
 	//	if (!itr)continue;//オブジェクトがあるかどうかチェック
 	//	itr->Draw();
 	//}
+	m_pGoal->Draw();
 }
+
+void StageObjectManager::SetCamera(CameraDebug* InCamera)
+{
+	m_pCamera = InCamera;
+	m_pGoal->SetCamera(InCamera);
+	for (auto& itr : m_StageObjects)
+	{
+		itr->SetCamera(InCamera);
+	}
+}
+

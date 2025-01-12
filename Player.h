@@ -6,6 +6,8 @@
 #include"Input.h"
 #include"Collision.h"
 #include"Wall.h"
+#include"Model.h"
+#include"Texture.h"
 //==============前方宣言========================
 class GaugeUI;
 
@@ -24,11 +26,15 @@ public:
     void SetItemNum(int InItemNum) { m_nItemCnt = InItemNum; }
 private:  
     void UpdateMove();
+    void DrawUI();
     void OnCollisionWall();
 private:
+    Model* m_pModel;
+    Model* m_pModelEquip;
     GaugeUI* m_pGaugeUI;
     Camera* m_pCamera; //カメラ情報
     DirectX::XMFLOAT3 m_move;//移動量
+    Texture* m_pTexture;
     //bool m_isStop;//ボールの停止判定
     //int m_shotStep;
     float m_power;

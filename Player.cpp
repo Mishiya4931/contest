@@ -1,7 +1,8 @@
 #include "Player.h"
 #include"Defines.h"
 #include"GaugeUI.h"
-
+#include"ShaderList.h"
+#include"ModelCache.h"
 //=============定数定義=========================
 #define MOVE_SPEED_BASE (0.07f)//スピードのベース
 #define MOVE_SPEED_NORMAl (0.0f)//通常のスピード
@@ -12,7 +13,10 @@
 #define DASH_INTERVAL (120)//ダッシュができるまでの時間
 #define GAUGE_UI_CORRECT (0.0054f)
 #define COLLISION_CORRECT (0.001f)
-
+#define PLAYER_UI_SPRITE_SPRIT_X (5.0f)
+#define PLAYER_UI_SPRITE_SPRIT_Y (2.0f)
+#define PLAYER_UI_SPRITE_POS_X (0.0f)
+#define PLAYER_UI_SPRITE_POS_Y (380.0f)
 //============グロ－バル定義====================
 //enum eGolfBallShotStep {
 //	SHOT_WAIT,  //  球を打つのを待つ
@@ -34,14 +38,18 @@ Player::Player() :
     m_nDashIntervalCnt(0),
     m_bDashFlag(false),
     m_pGaugeUI(nullptr),
-    m_nGaugeUICnt(DASH_TIME+DASH_INTERVAL),
-    m_nItemCnt(0)
+    m_nGaugeUICnt(DASH_TIME + DASH_INTERVAL),
+    m_nItemCnt(0), m_pModel(nullptr)
 {
+    m_pTexture = new Texture();
+    m_pTexture->Create("Assets/texture/number.png");
+    m_pModel = ModelCache::GetInstance()->GetCache("Player");
+    m_pModelEquip = ModelCache::GetInstance()->GetCache("PlayerEquip");
     m_pos = { 0.0f,0.5f,0.0f };
     m_pGaugeUI = new GaugeUI();
     m_box = {
     DirectX::XMFLOAT3(0.0f,0.5f,0.0f),
-    DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
+    DirectX::XMFLOAT3(1.0f,1.0f,1.0f)
     };
         
 }
@@ -49,6 +57,7 @@ Player::Player() :
 Player::~Player()
 {
     SAFE_DELETE(m_pGaugeUI);
+    SAFE_DELETE(m_pTexture);
 }
 //更新処理
 void Player::Update()
@@ -64,20 +73,80 @@ void Player::Update()
 //描画処理
 void Player::Draw()
 {
-    m_pGaugeUI->Draw();
-    DirectX::XMFLOAT4X4 world;
-    DirectX::XMMATRIX T = 
-        DirectX::XMMatrixTranslation(m_pos.x,m_pos.y,m_pos.z);
-    DirectX::XMMATRIX S = 
-        DirectX::XMMatrixScaling(0.4f,0.4f,0.4f);
+    DrawUI();
+    RenderTarget* pRTV = GetDefaultRTV(); // RenderTargetView 
+    DepthStencil* pDSV = GetDefaultDSV(); // DepthStencilView 
+    SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
+    DirectX::XMFLOAT4X4 wvp[3];
+    DirectX::XMMATRIX T =
+        DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+    DirectX::XMMATRIX S =
+        DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
     DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
         DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
         DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
     DirectX::XMMATRIX mat = S * R * T;
-    DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranspose(mat));
-    Geometory::SetWorld(world);
+    DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
+    wvp[1] = m_pCamera->GetViewMatrix();
+    wvp[2] = m_pCamera->GetProjectionMatrix();
 
-    Geometory::DrawBox();
+    // シェーダーへの変換行列を設定
+    ShaderList::SetWVP(wvp);
+
+    //// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
+    m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
+    m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_LAMBERT));
+
+    // 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
+    // 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
+    // 切り替える。
+
+    for (int i = 0; i < m_pModel->GetMeshNum(); ++i) {
+        //モデルのメッシュを取得
+        Model::Mesh mesh = *m_pModel->GetMesh(i);
+        //メッシュに割り当てられているマテリアル取得
+        Model::Material material = *m_pModel->GetMaterial(mesh.materialID);
+        //シェーダーへマテリアルを設定
+        material.ambient = { 0.6,0.6,0.6,1.0f };
+        ShaderList::SetMaterial(material);
+        //モデルの描画
+        m_pModel->Draw(i);
+    }
+    
+    T =
+       DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+    S =
+       DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
+       DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
+       DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
+    mat = S * R * T;
+    DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
+    wvp[1] = m_pCamera->GetViewMatrix();
+    wvp[2] = m_pCamera->GetProjectionMatrix();
+
+    // シェーダーへの変換行列を設定
+    ShaderList::SetWVP(wvp);
+
+    //// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
+    m_pModelEquip->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
+    m_pModelEquip->SetPixelShader(ShaderList::GetPS(ShaderList::PS_LAMBERT));
+
+    // 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
+    // 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
+    // 切り替える。
+
+    for (int i = 0; i < m_pModelEquip->GetMeshNum(); ++i) {
+        //モデルのメッシュを取得
+        Model::Mesh mesh = *m_pModelEquip->GetMesh(i);
+        //メッシュに割り当てられているマテリアル取得
+        Model::Material material = *m_pModelEquip->GetMaterial(mesh.materialID);
+        //シェーダーへマテリアルを設定
+        material.ambient = { 0.6,0.6,0.6,1.0f };
+        ShaderList::SetMaterial(material);
+        //モデルの描画
+        m_pModelEquip->Draw(i);
+    }
 }
 
 void Player::UpdateMove()
@@ -166,6 +235,43 @@ void Player::UpdateMove()
     // 位置を更新
     posVec = DirectX::XMVectorAdd(posVec, moveVec);
     DirectX::XMStoreFloat3(&m_pos, posVec);
+}
+
+void Player::DrawUI()
+{
+    RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得
+    DepthStencil* pDSV = GetDefaultDSV(); // 深度バッファの取得
+    // 2D表示の設定 
+    SetRenderTargets(1, &pRTV, nullptr);
+    // スプライトの表示に必要な行列を計算 
+    DirectX::XMFLOAT4X4 world, view, proj;
+    DirectX::XMMATRIX mView =
+        DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),
+            DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+            DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+        );
+    DirectX::XMMATRIX mProj = DirectX::XMMatrixOrthographicOffCenterLH(
+        0.0f, static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 0.0f, CMETER(30.0f), METER(2.0f));
+    DirectX::XMStoreFloat4x4(&view, DirectX::XMMatrixTranspose(mView));
+    DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(mProj));
+    Sprite::SetView(view);
+    Sprite::SetProjection(proj);
+
+    //一の位
+    int one = m_nItemCnt % 10;
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(PLAYER_UI_SPRITE_POS_X, PLAYER_UI_SPRITE_POS_Y, 0.0f);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Y上下反転
+    DirectX::XMMATRIX mWorld = S * T;// 拡縮→回転→移動
+    mWorld = DirectX::XMMatrixTranspose(mWorld);// 転置
+    DirectX::XMStoreFloat4x4(&world, mWorld);
+    Sprite::SetWorld(world);
+    Sprite::SetSize({ 160.0f, 160.0f }); //　サイズ
+    Sprite::SetOffset({ 0.0f, 0.0f });// 座標
+    Sprite::SetUVPos({ 1.0f / PLAYER_UI_SPRITE_SPRIT_X * (one % static_cast<int>(PLAYER_UI_SPRITE_SPRIT_X)),1.0f / PLAYER_UI_SPRITE_SPRIT_Y * (one / static_cast<int>(PLAYER_UI_SPRITE_SPRIT_X)) });
+    Sprite::SetUVScale({ 1.0f / PLAYER_UI_SPRITE_SPRIT_X,1.0f / PLAYER_UI_SPRITE_SPRIT_Y });
+    Sprite::SetTexture(m_pTexture);
+    Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    Sprite::Draw();
 }
 
 void Player::OnCollisionWall()

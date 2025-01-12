@@ -1,6 +1,6 @@
 #include "Scene.h"
 
-Scene::Scene() : m_pFade(nullptr), m_next(-1)
+Scene::Scene() : m_pFade(nullptr), m_next(-1),ChangeFlag(false)
 {
 
 }
@@ -26,15 +26,21 @@ void Scene::RootDraw()
 
 bool Scene::ChangeScene()
 {
-	if (m_pFade)
+	if (m_pFade) {
+		if(m_pFade->IsFinish() && m_pFade->IsFadeOut())ChangeFlag=false;
 		return m_pFade->IsFinish() && m_pFade->IsFadeOut();
+	}
 	return false;
 }
 
 void Scene::SetNext(int next)
 {
-	m_next = next;
-	// 切り替え先が発生した際にフェードも実行 
-	if (m_pFade)
-		m_pFade->Start(false);
+	if (!ChangeFlag) 
+	{
+		ChangeFlag = true;
+		m_next = next;
+		// 切り替え先が発生した際にフェードも実行 
+		if (m_pFade)
+			m_pFade->Start(false);
+	}
 }

@@ -8,5 +8,5 @@ HRESULT Init(HWND hWnd, UINT width, UINT height);
 void Uninit();
 void Update();
 void Draw();
-
+void ModelLoad();
 #endif // __MAIN_H__

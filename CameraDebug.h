@@ -1,7 +1,9 @@
+#pragma once
 #include "Camera.h" 
 #include "Input.h" 
 #include"Player.h"
-class CameraDebug : public Camera 
+
+class CameraDebug:public Camera
 {
 public:
 	CameraDebug();

@@ -31,5 +31,6 @@ public:
 protected:
 	Fade* m_pFade; // フェード処理クラス 
 	int  m_next;  // 切り替え先のシーン 
+	bool ChangeFlag;
 };
 

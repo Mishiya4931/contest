@@ -7,9 +7,13 @@
 #include"Player.h"
 #include"StageObjectManager.h"
 #include"GaugeUI.h"
+#include"timer.h"
+#include"Score.h"
+#include"CameraDebug.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
 EffectM* g_pEffekseerM;
+Timer* g_pTimer;
 SceneGame::SceneGame():
 	m_pCamera(nullptr),
 	m_pModel(nullptr),
@@ -26,11 +30,12 @@ SceneGame::SceneGame():
 	m_pCamera = new CameraDebug();
 	m_pPlayer = new Player();
 	m_pStageObjectManager->SetPlayer(m_pPlayer);
+	m_pStageObjectManager->SetCamera(m_pCamera);
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pPlayer->SetCamera(m_pCamera);
 	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
 	//g_pEffekseerM->SetCamera(m_pCamera);//カメラ情報を渡す
-
+	g_pTimer = new Timer();
 }
 
 SceneGame::~SceneGame()
@@ -50,6 +55,7 @@ if (m_pCamera) {
 	}
 	SAFE_DELETE(m_pPlayer);
 	SAFE_DELETE(m_pStageObjectManager);
+	SAFE_DELETE(g_pTimer);
 }
 
 void SceneGame::Update()
@@ -58,8 +64,11 @@ void SceneGame::Update()
 	m_pCamera->Update();
 	//g_pEffekseerM->Update();
 	m_pPlayer->Update();
-
-	if (IsKeyTrigger('P'))SetNext(0);//デバッグ
+	g_pTimer->Update();
+	if (g_pTimer->GetTime() < 1) { 
+		Score::GetInstanse()->SetScore(m_pStageObjectManager->GetStageObjectCnt());
+		SetNext(2); 
+	}//デバッグ
 }
 
 void SceneGame::Draw()
@@ -177,7 +186,6 @@ void SceneGame::Draw()
 	//DirectX::XMStoreFloat4x4(&wvp[2], DirectX::XMMatrixTranspose(proj));
 	wvp[1] = m_pCamera->GetViewMatrix();
 	wvp[2] = m_pCamera->GetProjectionMatrix();
-
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
 	m_pStageObjectManager->Draw();
@@ -207,4 +215,5 @@ void SceneGame::Draw()
 	//	m_pModel->Draw(i);
 	//}
 	//g_pEffekseerM->Draw();
+	g_pTimer->Draw();
 }
