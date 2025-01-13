@@ -19,7 +19,7 @@ static const float fFPS = static_cast<float>(FPS);
 static const float GRAVITY = 0.98f;
 
 // タイトル
-static const char* APP_TITLE = "DX22_Golf";
+static const char* APP_TITLE = "AngelCottonCandy";
 
 // 画面サイズ
 static const int SCREEN_WIDTH	= 1280;
