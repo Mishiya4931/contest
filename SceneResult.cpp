@@ -9,6 +9,11 @@ SceneResult::SceneResult():m_pCamera(nullptr),m_pTexture(nullptr)
 	m_pTexture = new Texture();
 	m_pTexture->Create("Assets/texture/Result.png");
 	m_pCamera = new CameraResult();
+	m_pBgm = LoadSound("Assets/sound/ResultBgm.mp3",true);
+	m_pspeaker = PlaySound(m_pBgm);
+	m_pspeaker->SetVolume(0.5f);
+	m_pSe = LoadSound("Assets/sound/Decision.mp3", false);
+
 }
 
 SceneResult::~SceneResult()
@@ -16,12 +21,17 @@ SceneResult::~SceneResult()
 	delete m_pCamera;
 	m_pCamera = nullptr;
 	SAFE_DELETE(m_pTexture);
+	m_pspeaker->Stop(0);
+	m_pspeaker=nullptr;
+	m_pSEspeaker=nullptr;
 }
 
 void SceneResult::Update()
 {
 	if (IsKeyTrigger(VK_RETURN))
 	{
+		m_pSEspeaker = PlaySound(m_pSe);
+		m_pSEspeaker->SetVolume(1.0f);
 		SetNext(0);
 	}
 	Score::GetInstanse()->Update();

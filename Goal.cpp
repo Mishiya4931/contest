@@ -15,10 +15,12 @@ Goal::Goal(DirectX::XMFLOAT3 InitPos):m_pPlayer(nullptr),m_pModel(nullptr),m_pCa
 	m_pos = InitPos;
 	Scale = { GOAL_SCALE-0.2f,GOAL_SCALE-0.2f,GOAL_SCALE-0.2f };
 	m_box = { InitPos,Scale };
+	m_pSetSe = LoadSound("Assets/sound/Set.mp3");
 }
 
 Goal::~Goal()
 {
+	m_pspeaker = nullptr;
 }
 
 void Goal::Update()
@@ -27,6 +29,8 @@ void Goal::Update()
     {
         if (m_pPlayer->GetItemNum() > 0)
         {
+			m_pspeaker = PlaySound(m_pSetSe);
+			m_pspeaker->SetVolume(1.0f);
 			ObjectNum += m_pPlayer->GetItemNum();
             m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() - m_pPlayer->GetItemNum());
         }

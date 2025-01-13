@@ -56,7 +56,8 @@ StageObjectManager::StageObjectManager():
 	{
 		m_WallObjects.push_back(new Wall(wallindex[i].Pos, wallindex[i].Rotation, wallindex[i].Size,i));
 	}
-
+	//サウンド関係
+	m_pGetSe = LoadSound("Assets/sound/Get.mp3");
 
 }
 
@@ -95,7 +96,8 @@ void StageObjectManager::Update()
 			// プレイヤーとオブジェクトが当たった場合
 			if (m_pPlayer->GetItemNum() < 5) {
 				m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() + 1);
-
+				m_pSEspeaker = PlaySound(m_pGetSe);
+				m_pSEspeaker->SetVolume(1.0f);
 				// 現在の要素を削除し、イテレーターを次に進める
 				itr = m_StageObjects.erase(itr);
 				continue; // erase後に++itrを呼ばない

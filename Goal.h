@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include"Model.h"
 #include"CameraDebug.h"
+#include"Sound.h"
 class Player;
 class Goal :public GameObject
 {
@@ -19,5 +20,8 @@ private:
 	CameraDebug* m_pCamera;
 	int ObjectNum;
 	DirectX::XMFLOAT3 Scale;
+	IXAudio2SourceVoice* m_pspeaker;
+	XAUDIO2_BUFFER* m_pSetSe;
+
 };
 

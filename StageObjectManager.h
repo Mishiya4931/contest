@@ -1,6 +1,7 @@
 #pragma once
 #include<vector>
 #include"CameraDebug.h"
+#include"Sound.h"
 class Player;
 class TrashObject;
 class Wall;
@@ -23,5 +24,7 @@ private:
 	Player* m_pPlayer;
 	Goal* m_pGoal;
 	CameraDebug* m_pCamera;
+	IXAudio2SourceVoice* m_pSEspeaker;
+	XAUDIO2_BUFFER* m_pGetSe;
 };
 

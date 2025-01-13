@@ -18,11 +18,6 @@
 #define PLAYER_UI_SPRITE_POS_X (80.0f)
 #define PLAYER_UI_SPRITE_POS_Y (80.0f)
 //============グロ－バル定義====================
-//enum eGolfBallShotStep {
-//	SHOT_WAIT,  //  球を打つのを待つ
-//	SHOT_KEEP,  //  キー入力開始
-//	SHOT_RELEASE, //  キー入力をやめた（球を打つ）
-//};
 
 enum ePlayerState {//プレイヤーの状態
     NORMAL,//通常
@@ -53,11 +48,12 @@ Player::Player() :
     DirectX::XMFLOAT3(0.0f,0.5f,0.0f),
     DirectX::XMFLOAT3(1.0f,1.0f,1.0f)
     };
-        
+    m_pDashSe = LoadSound("Assets/sound/Dash.mp3");
 }
 
 Player::~Player()
 {
+    m_pspeaker = nullptr;
     SAFE_DELETE(m_pGaugeUI);
     SAFE_DELETE(m_pTexture);
     SAFE_DELETE(m_pBackTexture);
@@ -176,6 +172,8 @@ void Player::UpdateMove()
     if (IsKeyTrigger(VK_SHIFT))//ダッシュフラグを立てる
     {
         if (!m_bDashFlag) {
+            m_pspeaker = PlaySound(m_pDashSe);
+            m_pspeaker->SetVolume(1.0f);
             m_bDashFlag = true;
             m_nGaugeUICnt = 0;
         }

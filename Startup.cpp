@@ -3,7 +3,7 @@
 #include "Main.h"
 #include <stdio.h>
 #include <crtdbg.h>
-
+#include"Sound.h"
 // timeGetTime周りの使用
 #pragma comment(lib, "winmm.lib")
 
@@ -57,7 +57,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// ウィンドウの表示
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-
+	InitSound();
 	// 初期化処理
 	if (FAILED(Init(hWnd, SCREEN_WIDTH, SCREEN_HEIGHT)))
 	{
@@ -104,6 +104,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	CoUninitialize();
 	timeEndPeriod(1);
 	Uninit();
+	UninitSound();
 	UnregisterClass(wcex.lpszClassName, hInstance);
 
 	return 0;

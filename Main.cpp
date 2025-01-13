@@ -38,7 +38,7 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 	ShaderList::Init();
 	Score::Init();
 	ModelCache::Init();
-	InitSound();
+	
 	// ÉVÅ[ÉìçÏê¨
 	ModelLoad();
 //	g_pGame = new SceneGame();
@@ -48,7 +48,7 @@ HRESULT Init(HWND hWnd, UINT width, UINT height)
 
 void Uninit()
 {
-	UninitSound();
+
 	delete g_pScene;
 	delete g_pFade;
 //	delete g_pGame;

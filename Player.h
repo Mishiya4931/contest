@@ -8,6 +8,7 @@
 #include"Wall.h"
 #include"Model.h"
 #include"Texture.h"
+#include"Sound.h"
 //==============前方宣言========================
 class GaugeUI;
 
@@ -45,5 +46,8 @@ private:
     int m_nDashIntervalCnt;//ダッシュができるまで時間
     int m_nGaugeUICnt;//ゲージのカウント
     int m_nItemCnt;
+    XAUDIO2_BUFFER* m_pDashSe;
+    IXAudio2SourceVoice* m_pspeaker;
+
 };
 

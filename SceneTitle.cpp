@@ -2,12 +2,16 @@
 #include"Input.h"
 #include"Defines.h"
 #include"Score.h"
+#include"Sound.h"
 SceneTitle::SceneTitle() : m_pLogo(nullptr)
 {
 	m_pLogo = new Texture();
 	m_pTitle = new Texture();
 	m_pEnter = new Texture();
-
+	m_pBgm = LoadSound("Assets/sound/TitleBgm.mp3",true);
+	m_pSe = LoadSound("Assets/sound/Decision.mp3",false);
+	m_pspeaker = PlaySound(m_pBgm);
+	m_pspeaker->SetVolume(0.5f);
 	Score::Reset();
 	if (FAILED(m_pTitle->Create("Assets/texture/Title.png")))
 		MessageBox(NULL, "Load failed SceneTitle.", "Error", MB_OK);
@@ -31,11 +35,16 @@ SceneTitle::~SceneTitle()
 		delete m_pEnter;
 		m_pEnter = nullptr;
 	}
+	m_pspeaker->Stop(0);
 }
 
 void SceneTitle::Update()
 {
-	if (IsKeyTrigger(VK_RETURN))SetNext(1); // 切り替え先のシーンを設定（１はゲーム 
+	if (IsKeyTrigger(VK_RETURN)) {
+		m_pspeaker2 = PlaySound(m_pSe);
+		m_pspeaker2->SetVolume(1.0f);
+		SetNext(1); // 切り替え先のシーンを設定（１はゲーム 
+	}
 }
 
 void SceneTitle::Draw()

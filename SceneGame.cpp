@@ -37,6 +37,10 @@ SceneGame::SceneGame() :
 	m_pPlayer->SetCamera(m_pCamera);
 	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
 	g_pTimer = new Timer();
+
+	m_pBgm = LoadSound("Assets/sound/MainBgm.mp3",true);
+	m_pspeaker = PlaySound(m_pBgm);
+	m_pspeaker->SetVolume(0.5f);
 }
 
 SceneGame::~SceneGame()
@@ -58,6 +62,7 @@ if (m_pCamera) {
 	SAFE_DELETE(m_pStageObjectManager);
 	SAFE_DELETE(g_pTimer);
 	SAFE_DELETE(m_pTexture);
+	m_pspeaker->Stop(0);
 }
 
 void SceneGame::Update()

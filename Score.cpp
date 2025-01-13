@@ -5,6 +5,8 @@
 #include<random>
 Score* Score::Instanse;
 bool Score::m_bResultFlg;
+bool Score::m_bSoundFlag;
+bool Score::m_bDrumSoundFlag;
 int Score::cnt;
 #define SCORE_SPRITE_SPRIT_X (5.0f)
 #define SCORE_SPRITE_SPRIT_Y (2.0f)
@@ -26,10 +28,18 @@ Score::Score():m_pTexture(nullptr)
 	m_pScore3 = new Texture();
 	m_pScore3->Create("Assets/texture/Score3.png");
 	m_bResultFlg = false;
+	m_pDrumrollSe = LoadSound("Assets/sound/Drum.mp3", false);
+	m_pAnnounceSe = LoadSound("Assets/sound/announce.mp3",false);
+	m_pExcellAnnounceSe = LoadSound("Assets/sound/Excellannounce.mp3", false);
+	m_pSosoSe = LoadSound("Assets/sound/Soso.mp3", false);
+	m_pExcellentSe = LoadSound("Assets/sound/Excellent.mp3", false);
 }
 
 Score::~Score()
 {
+	m_pExcellentSEspeaker = nullptr;
+	m_pAnnounceSEspeaker = nullptr;
+	m_pSEspeaker = nullptr;
 	SAFE_DELETE(m_pTexture);
 	SAFE_DELETE(m_pScoreTexture);
 	SAFE_DELETE(m_pScore1);
@@ -58,15 +68,22 @@ void Score::Uninit()
 
 void Score::Reset()
 {
+	m_bSoundFlag = false;
+	m_bDrumSoundFlag = true;
 	m_bResultFlg = false;
 	cnt = 0;
 }
 
 void Score::Update()
 {
-	
+	if (m_bDrumSoundFlag)
+	{
+		m_pSEspeaker = PlaySound(m_pDrumrollSe);
+		m_bDrumSoundFlag = false;
+	}
 	if (cnt > 120)
 	{
+		m_pSEspeaker->Stop(0);
 		m_bResultFlg = true;
 	}
 	cnt++;
@@ -120,19 +137,37 @@ void Score::Draw()
 		Sprite::SetOffset({ 0.0f, 0.0f });// À•W
 		Sprite::SetUVPos({ 0.0f,0.0f });
 		Sprite::SetUVScale({ 1.0f,1.0f });
-		if (m_nScore > 40)
-		{
-			Sprite::SetTexture(m_pScore3);
-		}
-		else if (m_nScore > 30)
-		{
-			Sprite::SetTexture(m_pScore2);
-		}
-		else if (m_nScore > 0)
-		{
-			Sprite::SetTexture(m_pScore1);
-		}
+		
+			if (m_nScore > 40)
+			{
+				if (!m_bSoundFlag) {
+					m_pAnnounceSEspeaker = PlaySound(m_pAnnounceSe);
+					m_pExcellentSEspeaker = PlaySound(m_pSosoSe);
+					m_bSoundFlag = true;
+				}
+				Sprite::SetTexture(m_pScore3);
+			}
+			else if (m_nScore > 30)
+			{
+				if (!m_bSoundFlag) {
+					m_pAnnounceSEspeaker = PlaySound(m_pAnnounceSe);
+					m_pExcellentSEspeaker = PlaySound(m_pExcellentSe);
+					m_bSoundFlag = true;
+				}
+				Sprite::SetTexture(m_pScore2);
+			}
+			else if (m_nScore > 0)
+			{
+				if (!m_bSoundFlag) {
+					m_pAnnounceSEspeaker = PlaySound(m_pExcellAnnounceSe);
+					m_pExcellentSEspeaker = PlaySound(m_pExcellentSe);
+					m_bSoundFlag = true;
+				}
+				Sprite::SetTexture(m_pScore1);
+			}
+			
 
+		
 		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		Sprite::Draw();
 

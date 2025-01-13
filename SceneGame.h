@@ -6,6 +6,7 @@
 #include"Player.h"
 #include"Scene.h"
 #include"Texture.h"
+#include"Sound.h"
 class StageObjectManager;
 
 class SceneGame :public Scene 
@@ -25,6 +26,9 @@ private:
 	int StartTimer;
 	int Framecnt;
 	bool StartFlag;
+	IXAudio2SourceVoice* m_pspeaker;
+	XAUDIO2_BUFFER* m_pBgm;
+
 };
 
 #endif // __SCENE_GAME_H__

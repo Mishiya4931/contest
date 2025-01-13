@@ -1,4 +1,5 @@
 #pragma once
+#include"Sound.h"
 class Texture;
 class Score
 {
@@ -26,5 +27,15 @@ private:
 	Texture* m_pScore1;
 	Texture* m_pScore2;
 	Texture* m_pScore3;
+	IXAudio2SourceVoice* m_pSEspeaker;
+	IXAudio2SourceVoice* m_pAnnounceSEspeaker;
+	IXAudio2SourceVoice* m_pExcellentSEspeaker;
+	XAUDIO2_BUFFER* m_pDrumrollSe;
+	XAUDIO2_BUFFER* m_pAnnounceSe;
+	XAUDIO2_BUFFER* m_pExcellAnnounceSe;
+	XAUDIO2_BUFFER* m_pExcellentSe;
+	XAUDIO2_BUFFER* m_pSosoSe;
+	static bool m_bSoundFlag;
+	static bool m_bDrumSoundFlag;
 };
 
