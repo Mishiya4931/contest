@@ -95,15 +95,23 @@ void StageObjectManager::Update()
 		if (Collision::Hit((*itr)->GetCollision(), m_pPlayer->GetCollision()).isHit) {
 			// プレイヤーとオブジェクトが当たった場合
 			if (m_pPlayer->GetItemNum() < 5) {
-				m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() + 1);
-				m_pSEspeaker = PlaySound(m_pGetSe);
-				m_pSEspeaker->SetVolume(1.0f);
-				// 現在の要素を削除し、イテレーターを次に進める
-				itr = m_StageObjects.erase(itr);
-				continue; // erase後に++itrを呼ばない
+				if (!(*itr)->GetDeletePrepareFlag())
+				{
+					m_pPlayer->SetItemNum(m_pPlayer->GetItemNum() + 1);
+					m_pSEspeaker = PlaySound(m_pGetSe);
+					m_pSEspeaker->SetVolume(1.0f);
+					// 現在の要素を削除し、イテレーターを次に進める
+					(*itr)->SetDeletePrepareFlag(true);
+					continue;
+				}
+				
 			}
 		}
-
+		if ((*itr)->GetDeleteFlag())
+		{
+			itr = m_StageObjects.erase(itr);
+			continue;
+		}
 		++itr; // 通常時は次の要素に進む
 	}
 	for (auto& itr : m_WallObjects)

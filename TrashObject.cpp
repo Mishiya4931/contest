@@ -8,13 +8,16 @@ TrashObject::TrashObject()
 
 }
 
-TrashObject::TrashObject(DirectX::XMFLOAT3 InitPos,int InitRotation) :GameObject(InitPos), m_pModel(nullptr), m_nRotationcnt(0), m_nRotationFlag(InitRotation)
+TrashObject::TrashObject(DirectX::XMFLOAT3 InitPos, int InitRotation) :
+	GameObject(InitPos), m_pModel(nullptr), m_nRotationcnt(0),
+	m_nRotationFlag(InitRotation), m_bDeleteFlag(false), m_bDeletePrepareFlag(false)
 {
 	m_pModel = ModelCache::GetInstance()->GetCache("Cloud");
     m_box = {
 DirectX::XMFLOAT3(m_pos),
 DirectX::XMFLOAT3(0.4f,0.4f,0.4f)
     };
+	m_Scale = { 1.0f,1.0f,1.0f };
 }
 
 TrashObject::~TrashObject()
@@ -39,6 +42,18 @@ void TrashObject::Update()
 	{
 		m_Rotation.y = m_Rotation.y + 360.0f;
 	}
+	if (m_bDeletePrepareFlag)
+	{
+		m_Scale.x += -0.1f;
+		m_Scale.y += -0.1f;
+		m_Scale.z += -0.1f;
+		if (m_Scale.x < 0.0f)m_Scale.x = 0.0f;
+		if (m_Scale.y < 0.0f)m_Scale.y = 0.0f;
+		if (m_Scale.z < 0.0f) { 
+			m_Scale.z = 0.0f; 
+			m_bDeleteFlag = true;
+		}
+	}
 }
 
 void TrashObject::Draw()
@@ -50,7 +65,7 @@ void TrashObject::Draw()
     DirectX::XMMATRIX T =
         DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
     DirectX::XMMATRIX S =
-        DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+        DirectX::XMMatrixScaling(m_Scale.x, m_Scale.y, m_Scale.z);
     DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
         DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.y)) *
         DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.z)); // ‰ñ“]

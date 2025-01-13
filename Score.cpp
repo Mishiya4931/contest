@@ -156,7 +156,7 @@ void Score::Draw()
 				}
 				Sprite::SetTexture(m_pScore2);
 			}
-			else if (m_nScore > 0)
+			else if (m_nScore >= 0)
 			{
 				if (!m_bSoundFlag) {
 					m_pAnnounceSEspeaker = PlaySound(m_pExcellAnnounceSe);
