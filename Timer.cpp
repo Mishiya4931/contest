@@ -2,7 +2,7 @@
 #include"Texture.h"
 #include"Sprite.h"
 #include"Defines.h"
-#define INIT_TIMER (10)
+#define INIT_TIMER (60)
 #define TIMER_SPRITE_SPRIT_X (5.0f)
 #define TIMER_SPRITE_SPRIT_Y (2.0f)
 Timer::Timer():m_nTimeCnt(INIT_TIMER)

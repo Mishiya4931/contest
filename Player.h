@@ -28,6 +28,7 @@ public:
 private:  
     void UpdateMove();
     void DrawUI();
+    void DrawEffect();
     void OnCollisionWall();
 private:
     Model* m_pModel;
@@ -37,8 +38,7 @@ private:
     DirectX::XMFLOAT3 m_move;//à⁄ìÆó 
     Texture* m_pTexture;
     Texture* m_pBackTexture;
-    //bool m_isStop;//É{Å[ÉãÇÃí‚é~îªíË
-    //int m_shotStep;
+    Texture* m_pEffectTexture;
     float m_power;
     std::vector <Wall*> m_pWall;
     float m_fDashSpeed;

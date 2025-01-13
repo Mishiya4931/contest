@@ -71,9 +71,11 @@ void GaugeUI::Draw()
 		DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixTranspose(mWorld));
 
 		Sprite::SetWorld(world);       // スプライトのワールド行列を設定 
-		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f});
+		Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		Sprite::SetSize(size[i]);      // スプライトのサイズを設定 
 		Sprite::SetOffset({ size[i].x * 0.5f, 0.0f }); // スプライトの原点を変更 
+		Sprite::SetUVPos({ 0.0f, 0.0f });
+		Sprite::SetUVScale ({ 1.0f, 1.0f });
 		Sprite::SetTexture(pTex[i]);      // テクスチャを設定 
 		Sprite::Draw();
 	}

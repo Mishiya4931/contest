@@ -17,6 +17,12 @@
 #define PLAYER_UI_SPRITE_SPRIT_Y (2.0f)
 #define PLAYER_UI_SPRITE_POS_X (80.0f)
 #define PLAYER_UI_SPRITE_POS_Y (80.0f)
+#define PLAYER_EFFECT_SPRITE_SIZE_X (1280.0f)
+#define PLAYER_EFFECT_SPRITE_SIZE_Y (850.0f)
+#define PLAYER_EFFECT_SPRITE_SPRIT_X (6.0f)
+#define PLAYER_EFFECT_SPRITE_SPRIT_Y (6.0f)
+#define PLAYER_EFFECT_SPRITE_POS_X (640)
+#define PLAYER_EFFECT_SPRITE_POS_Y (300)
 //============グロ－バル定義====================
 
 enum ePlayerState {//プレイヤーの状態
@@ -38,8 +44,10 @@ Player::Player() :
 {
     m_pTexture = new Texture();
     m_pBackTexture = new Texture();
+    m_pEffectTexture = new Texture();
     m_pTexture->Create("Assets/texture/number.png");
     m_pBackTexture->Create("Assets/texture/CloudUI.png");
+    m_pEffectTexture->Create("Assets/texture/Dash.png");
     m_pModel = ModelCache::GetInstance()->GetCache("Player");
     m_pModelEquip = ModelCache::GetInstance()->GetCache("PlayerEquip");
     m_pos = { 0.0f,0.5f,0.0f };
@@ -57,6 +65,7 @@ Player::~Player()
     SAFE_DELETE(m_pGaugeUI);
     SAFE_DELETE(m_pTexture);
     SAFE_DELETE(m_pBackTexture);
+    SAFE_DELETE(m_pEffectTexture);
 }
 //更新処理
 void Player::Update()
@@ -73,6 +82,7 @@ void Player::Update()
 void Player::Draw()
 {
     DrawUI();
+    m_pGaugeUI->Draw();
     RenderTarget* pRTV = GetDefaultRTV(); // RenderTargetView 
     DepthStencil* pDSV = GetDefaultDSV(); // DepthStencilView 
     SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
@@ -146,11 +156,15 @@ void Player::Draw()
         //モデルの描画
         m_pModelEquip->Draw(i);
     }
+    if (g_eState == DASH) {//ダッシュ状態のときエフェクトを出す
+        DrawEffect();
+    }
+    
 }
 
 void Player::UpdateMove()
 {
-
+    
     if (IsKeyPress('A'))
     {
         m_Rotation.z += -ROTATION_SPEED_BASE;
@@ -187,6 +201,7 @@ void Player::UpdateMove()
         if (m_nDashIntervalCnt < DASH_TIME)//DASH_TIMEの時間分DASH状態になりスピードが上がる
         {
             g_eState = DASH;
+           
         }
         else if(DASH_TIME < m_nDashIntervalCnt && m_nDashIntervalCnt <DASH_TIME + DASH_INTERVAL)//時間が経過したらNORMAL状態へ
         {
@@ -286,6 +301,54 @@ void Player::DrawUI()
     Sprite::SetTexture(m_pTexture);
     Sprite::SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
     Sprite::Draw();
+}
+
+void Player::DrawEffect()
+{
+    RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得
+    DepthStencil* pDSV = GetDefaultDSV(); // 深度バッファの取得
+    // 2D表示の設定 
+    SetRenderTargets(1, &pRTV, nullptr);
+    // スプライトの表示に必要な行列を計算 
+    static int cnt = 0;
+    static int FrameCnt = 0;
+    if (FrameCnt > 4)
+    {
+        cnt++;
+        FrameCnt = 0;
+    }
+    FrameCnt++;
+    if (cnt > PLAYER_EFFECT_SPRITE_SPRIT_X * PLAYER_EFFECT_SPRITE_SPRIT_Y)
+    {
+        cnt = 0;
+    }
+    DirectX::XMFLOAT4X4 world, view, proj;
+    DirectX::XMMATRIX mView =
+        DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),
+            DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+            DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+        );
+    DirectX::XMMATRIX mProj = DirectX::XMMatrixOrthographicOffCenterLH(
+        0.0f, static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 0.0f, CMETER(30.0f), METER(2.0f));
+    DirectX::XMStoreFloat4x4(&view, DirectX::XMMatrixTranspose(mView));
+    DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(mProj));
+    Sprite::SetView(view);
+    Sprite::SetProjection(proj);
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(PLAYER_EFFECT_SPRITE_POS_X, PLAYER_EFFECT_SPRITE_POS_Y, 0.0f);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Y上下反転
+    DirectX::XMMATRIX mWorld = S * T;// 拡縮→回転→移動
+    mWorld = DirectX::XMMatrixTranspose(mWorld);// 転置
+    DirectX::XMStoreFloat4x4(&world, mWorld);
+    Sprite::SetWorld(world);
+    Sprite::SetSize({ PLAYER_EFFECT_SPRITE_SIZE_X, PLAYER_EFFECT_SPRITE_SIZE_Y }); //　サイズ
+    Sprite::SetOffset({ 0.0f, 0.0f });// 座標
+    Sprite::SetUVPos({ 1.0f / PLAYER_EFFECT_SPRITE_SPRIT_X * (cnt % static_cast<int>(PLAYER_EFFECT_SPRITE_SPRIT_X)),1.0f / PLAYER_EFFECT_SPRITE_SPRIT_Y * (cnt / static_cast<int>(PLAYER_EFFECT_SPRITE_SPRIT_X)) });
+    Sprite::SetUVScale({ 1.0f / PLAYER_EFFECT_SPRITE_SPRIT_X,1.0f / PLAYER_EFFECT_SPRITE_SPRIT_Y });
+
+    Sprite::SetTexture(m_pEffectTexture);
+    Sprite::SetColor({ 0.5f, 0.5f , 0.5f, 0.1f });
+    Sprite::Draw();
+
 }
 
 void Player::OnCollisionWall()
