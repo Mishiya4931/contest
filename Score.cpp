@@ -138,7 +138,7 @@ void Score::Draw()
 		Sprite::SetUVPos({ 0.0f,0.0f });
 		Sprite::SetUVScale({ 1.0f,1.0f });
 		
-			if (m_nScore > 40)
+			if (m_nScore > 30)
 			{
 				if (!m_bSoundFlag) {
 					m_pAnnounceSEspeaker = PlaySound(m_pAnnounceSe);
@@ -147,7 +147,7 @@ void Score::Draw()
 				}
 				Sprite::SetTexture(m_pScore3);
 			}
-			else if (m_nScore > 30)
+			else if (m_nScore > 15)
 			{
 				if (!m_bSoundFlag) {
 					m_pAnnounceSEspeaker = PlaySound(m_pAnnounceSe);
@@ -172,7 +172,7 @@ void Score::Draw()
 		Sprite::Draw();
 
 
-		int nScoreCorrect = 50 - m_nScore;
+		int nScoreCorrect = 40 - m_nScore;
 
 
 		//ˆê‚ÌˆÊ

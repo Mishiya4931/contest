@@ -8,7 +8,7 @@
 #include"ModelCache.h"
 #include"Model.h"
 #include"CameraDebug.h"
-#define STAGE_OBJECT_NUMBER (50)
+#define STAGE_OBJECT_NUMBER (40)
 StageObjectManager::StageObjectManager():
 	m_pPlayer(nullptr),
 	m_pGoal(nullptr)
