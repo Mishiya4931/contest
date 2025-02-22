@@ -10,15 +10,20 @@
 #include"timer.h"
 #include"Score.h"
 #include"CameraDebug.h"
+#include"Minimap.h"
+#include"CameraMinimap.h"
 #define PAI (3.141592f)
 #define ANGLE(a) PAI/180.0f*a
 #define TIMER_SPRITE_SPRIT_X (5.0f)
 #define TIMER_SPRITE_SPRIT_Y (2.0f)
-
+enum CameraKind {
+	CAM_PLAYER,
+	CAM_MINIMAP
+};
 EffectM* g_pEffekseerM;
 Timer* g_pTimer;
 SceneGame::SceneGame() :
-	m_pCamera(nullptr),
+	m_pDebugCamera(nullptr),
 	m_pModel(nullptr),
 	m_pPlayer(nullptr),
 	m_pStageObjectManager(nullptr),
@@ -29,25 +34,37 @@ SceneGame::SceneGame() :
 	m_pTexture = new Texture();
 	m_pTexture->Create("Assets/texture/number.png");
 	m_pStageObjectManager = new StageObjectManager();
-	m_pCamera = new CameraDebug();
+	m_pDebugCamera = new CameraDebug();
 	m_pPlayer = new Player();
 	m_pStageObjectManager->SetPlayer(m_pPlayer);
-	m_pStageObjectManager->SetCamera(m_pCamera);
-	m_pCamera->SetPlayer(m_pPlayer);
-	m_pPlayer->SetCamera(m_pCamera);
+	m_pStageObjectManager->SetCamera(m_pDebugCamera);
+	m_pDebugCamera->SetPlayer(m_pPlayer);
+	m_pPlayer->SetCamera(m_pDebugCamera);
 	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
+	pCamMinimap = new CameraMinimap();
+	m_pCamera[CAM_PLAYER] = m_pDebugCamera;
+	m_pCamera[CAM_MINIMAP] = pCamMinimap;
 	g_pTimer = new Timer();
 
 	m_pBgm = LoadSound("Assets/sound/MainBgm.mp3",true);
 	m_pspeaker = PlaySound(m_pBgm);
 	m_pspeaker->SetVolume(0.5f);
+	// コンストラクタ（ミニマップオブジェクトの作成）
+	m_pMinimap = new Minimap();
+	pCamMinimap->SetPlayer(m_pPlayer);
+	m_pMinimap->SetCamera(pCamMinimap);
 }
 
 SceneGame::~SceneGame()
 {
-if (m_pCamera) {
-	delete m_pCamera;
-	m_pCamera = nullptr;
+	SAFE_DELETE(m_pMinimap);
+	if (m_pCamera[0]) {
+		delete m_pCamera[0];
+		m_pCamera[0] = nullptr;
+	}
+	if(m_pCamera[1]){
+	delete m_pCamera[1];
+	m_pCamera[1] = nullptr;
 	}
 	if (m_pModel) {
 		delete m_pModel;
@@ -69,7 +86,7 @@ void SceneGame::Update()
 {
 
 
-		m_pCamera->Update();
+	m_pCamera[CAM_PLAYER]->Update();
 	if (StartFlag)
 	{
 		m_pStageObjectManager->Update();
@@ -148,8 +165,8 @@ void SceneGame::Draw()
 	pRTV = GetDefaultRTV(); // RenderTargetView 
 	pDSV = GetDefaultDSV(); // DepthStencilView 
 	SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
-	Geometory::SetView(m_pCamera->GetViewMatrix());
-	Geometory::SetProjection(m_pCamera->GetProjectionMatrix());
+	Geometory::SetView(m_pCamera[CAM_PLAYER]->GetViewMatrix());
+	Geometory::SetProjection(m_pCamera[CAM_PLAYER]->GetProjectionMatrix());
 	
 	T = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	S = DirectX::XMMatrixScaling(1.0f, 1.0f,1.0f);
@@ -167,8 +184,8 @@ void SceneGame::Draw()
 	DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(world));
 	//DirectX::XMStoreFloat4x4(&wvp[1], DirectX::XMMatrixTranspose(view));
 	//DirectX::XMStoreFloat4x4(&wvp[2], DirectX::XMMatrixTranspose(proj));
-	wvp[1] = m_pCamera->GetViewMatrix();
-	wvp[2] = m_pCamera->GetProjectionMatrix();
+	wvp[1] = m_pCamera[CAM_PLAYER]->GetViewMatrix();
+	wvp[2] = m_pCamera[CAM_PLAYER]->GetProjectionMatrix();
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
 	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
@@ -179,4 +196,31 @@ void SceneGame::Draw()
 	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
 	// 切り替える。
 	g_pTimer->Draw();
+
+	//  
+	m_pCamera[CAM_MINIMAP]->Update();   //  
+	m_pPlayer->SetCamera(m_pCamera[CAM_MINIMAP]); //  
+
+
+	view4x4 = m_pCamera[CAM_MINIMAP]->GetViewMatrix();
+	proj4x4 = m_pCamera[CAM_MINIMAP]->GetProjectionMatrix();
+	Geometory::SetView(view4x4);
+	Geometory::SetProjection(proj4x4);
+	Sprite::SetView(view4x4);
+	Sprite::SetProjection(proj4x4);
+
+	m_pMinimap->SetCamera(m_pCamera[CAM_MINIMAP]);
+	m_pMinimap->BeginRender();
+
+	m_pPlayer->Draw();
+
+
+	//  
+	m_pMinimap->EndRender();
+	m_pPlayer->SetCamera(m_pCamera[CAM_PLAYER]); //  
+
+	// 2D 
+	SetRenderTargets(1, &pRTV, nullptr);
+	m_pMinimap->Draw();
+	SetRenderTargets(1, &pRTV, pDSV);
 }

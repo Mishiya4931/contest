@@ -7,6 +7,8 @@
 #include"Scene.h"
 #include"Texture.h"
 #include"Sound.h"
+#include"Minimap.h"
+#include"CameraMinimap.h"
 class StageObjectManager;
 
 class SceneGame :public Scene 
@@ -19,7 +21,8 @@ public:
 
 private:
 	Model* m_pModel;
-	CameraDebug* m_pCamera;
+	Camera* m_pCamera[2];
+	CameraDebug* m_pDebugCamera;
 	Player* m_pPlayer;
 	StageObjectManager* m_pStageObjectManager;
 	Texture* m_pTexture;
@@ -28,7 +31,8 @@ private:
 	bool StartFlag;
 	IXAudio2SourceVoice* m_pspeaker;
 	XAUDIO2_BUFFER* m_pBgm;
-
+	Minimap* m_pMinimap;
+	CameraMinimap* pCamMinimap;
 };
 
 #endif // __SCENE_GAME_H__

@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDebug.cpp" />
+    <ClCompile Include="CameraMinimap.cpp" />
     <ClCompile Include="CameraResult.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DirectX.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshBuffer.cpp" />
+    <ClCompile Include="Minimap.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelCache.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -194,6 +196,7 @@
     <ClInclude Include="..\include\EffekseerSoundXAudio2.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraDebug.h" />
+    <ClInclude Include="CameraMinimap.h" />
     <ClInclude Include="CameraResult.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Defines.h" />
@@ -208,6 +211,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="MeshBuffer.h" />
+    <ClInclude Include="Minimap.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
     <ClInclude Include="Player.h" />
