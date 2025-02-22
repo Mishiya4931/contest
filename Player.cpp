@@ -81,11 +81,13 @@ void Player::Update()
 //描画処理
 void Player::Draw()
 {
+    RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得
+    DepthStencil* pDSV = GetDefaultDSV(); // 深度バッファの取得
+    // 2D表示の設定 
+    SetRenderTargets(1, &pRTV, pDSV);
     DrawUI();
     m_pGaugeUI->Draw();
-    RenderTarget* pRTV = GetDefaultRTV(); // RenderTargetView 
-    DepthStencil* pDSV = GetDefaultDSV(); // DepthStencilView 
-    SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
+
     DirectX::XMFLOAT4X4 wvp[3];
     DirectX::XMMATRIX T =
         DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
@@ -162,6 +164,79 @@ void Player::Draw()
     
 }
 
+void Player::DrawMiniMapModel()
+{
+    DirectX::XMFLOAT4X4 wvp[3];
+    DirectX::XMMATRIX T =
+        DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+    DirectX::XMMATRIX S =
+        DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
+        DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
+        DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
+    DirectX::XMMATRIX mat = S * R * T;
+    DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
+    wvp[1] = m_pCamera->GetViewMatrix();
+    wvp[2] = m_pCamera->GetProjectionMatrix();
+
+    // シェーダーへの変換行列を設定
+    ShaderList::SetWVP(wvp);
+
+    //// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
+    m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
+    m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_LAMBERT));
+
+    // 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
+    // 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
+    // 切り替える。
+
+    for (int i = 0; i < m_pModel->GetMeshNum(); ++i) {
+        //モデルのメッシュを取得
+        Model::Mesh mesh = *m_pModel->GetMesh(i);
+        //メッシュに割り当てられているマテリアル取得
+        Model::Material material = *m_pModel->GetMaterial(mesh.materialID);
+        //シェーダーへマテリアルを設定
+        material.ambient = { 0.6,0.6,0.6,1.0f };
+        ShaderList::SetMaterial(material);
+        //モデルの描画
+        m_pModel->Draw(i);
+    }
+
+    T =
+        DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+    S =
+        DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
+        DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
+        DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
+    mat = S * R * T;
+    DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
+    wvp[1] = m_pCamera->GetViewMatrix();
+    wvp[2] = m_pCamera->GetProjectionMatrix();
+
+    // シェーダーへの変換行列を設定
+    ShaderList::SetWVP(wvp);
+
+    //// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
+    m_pModelEquip->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
+    m_pModelEquip->SetPixelShader(ShaderList::GetPS(ShaderList::PS_LAMBERT));
+
+    // 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
+    // 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
+    // 切り替える。
+
+    for (int i = 0; i < m_pModelEquip->GetMeshNum(); ++i) {
+        //モデルのメッシュを取得
+        Model::Mesh mesh = *m_pModelEquip->GetMesh(i);
+        //メッシュに割り当てられているマテリアル取得
+        Model::Material material = *m_pModelEquip->GetMaterial(mesh.materialID);
+        //シェーダーへマテリアルを設定
+        material.ambient = { 0.6,0.6,0.6,1.0f };
+        ShaderList::SetMaterial(material);
+        //モデルの描画
+        m_pModelEquip->Draw(i);
+    }
+}
 void Player::UpdateMove()
 {
     

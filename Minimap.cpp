@@ -1,18 +1,19 @@
 #include "Minimap.h"
-
+/// @brief コンストラクタ
 Minimap::Minimap() : m_pRenderTarget(nullptr) {
+    //作成する書き込み先の大きさ
     float width = 512;
     float height = 512;
 
     // レンダーターゲットを作成
     m_pRenderTarget = new RenderTarget();
     m_pRenderTarget->Create(DXGI_FORMAT_R8G8B8A8_UNORM, width, height);
-
+    
     // 深度ステンシルを作成
     m_pDepthStencil = new DepthStencil();
     m_pDepthStencil->Create(width, height, false);
 }
-
+/// @brief デストラクタ
 Minimap::~Minimap() {
     if (m_pDepthStencil) {
         delete m_pDepthStencil;
@@ -23,16 +24,28 @@ Minimap::~Minimap() {
         m_pRenderTarget = nullptr;
     }
 }
-
+/// @brief ミニマップを描画
 void Minimap::Draw() {
     DirectX::XMFLOAT4X4 world, view, proj;
+
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(490.0f, 210.0f, 0.0f);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);// Y上下反転
+
+    DirectX::XMMATRIX mWorld = S * T;// 拡縮→回転→移動
+    mWorld = DirectX::XMMatrixTranspose(mWorld);// 転置
+    DirectX::XMStoreFloat4x4(&world, mWorld);
+
+    //画面の手前に引いてカメラを設置
     DirectX::XMMATRIX mView = DirectX::XMMatrixLookAtLH(
-        DirectX::XMVectorSet(0.0f, 0.0f, -0.3f, 0.0f),
-        DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
-        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+        DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f),//カメラの位置
+        DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), //カメラの注視点
+        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)//カメラのUpベクトル
     );
+
+    //2Dに見える行列を設定。原点の位置をどこにするか
+    //考えながら、各引数を指定
     DirectX::XMMATRIX mProj = DirectX::XMMatrixOrthographicOffCenterLH(
-        0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 0.1f, 10.0f
+        -640.0f, 640.0f, -360.0f, 360.0f, 0.5f, 100.0f
     );
     mView = DirectX::XMMatrixTranspose(mView);
     mProj = DirectX::XMMatrixTranspose(mProj);
@@ -40,20 +53,21 @@ void Minimap::Draw() {
     DirectX::XMStoreFloat4x4(&proj, mProj);
     Sprite::SetView(view);
     Sprite::SetProjection(proj);
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0.0f);
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(1.0f, -1.0f, 1.0f);// Y上下反転
+    //画面中央を原点として、右上あたりに表示
+    //画面幅(1280,720)とすると画面上と画面右はそれぞれ(640,360)となる。画面サイズは200で
+    //画面端から50離して表示したいので
 
-    DirectX::XMMATRIX mWorld = S * T;// 拡縮→回転→移動
-    mWorld = DirectX::XMMatrixTranspose(mWorld);// 転置
-    DirectX::XMStoreFloat4x4(&world, mWorld);
+    //スプライトに各種情報を設定して表示
     Sprite::SetWorld(world);
     // ミニマップのサイズと色を設定
-    Sprite::SetSize({ 600.0f, 600.0f }); // 画面サイズ
-    Sprite::SetColor({ 1, 0, 0, 1 });
+    Sprite::SetSize({ 200.0f, 200.0f }); // 画面サイズ
+    Sprite::SetColor({ 1, 1, 1, 1 });
+    Sprite::SetUVPos({0.0f,0.0f});
+    Sprite::SetUVScale({1.0f,1.0f});
     Sprite::SetTexture(m_pRenderTarget);
     Sprite::Draw();
 }
-
+/// @brief ミニマップの作成開始
 void Minimap::BeginRender() {
     // レンダーターゲットと深度ステンシルをクリア
     m_pRenderTarget->Clear();
@@ -62,7 +76,7 @@ void Minimap::BeginRender() {
     // ミニマップのレンダーターゲットを設定
     SetRenderTargets(1, &m_pRenderTarget, m_pDepthStencil);
 }
-
+/// @brief ミニマップの作成終了
 void Minimap::EndRender() {
         // デフォルトのレンダーターゲットに戻す
         RenderTarget* pDefRTV = GetDefaultRTV();

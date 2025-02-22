@@ -34,37 +34,41 @@ SceneGame::SceneGame() :
 	m_pTexture = new Texture();
 	m_pTexture->Create("Assets/texture/number.png");
 	m_pStageObjectManager = new StageObjectManager();
-	m_pDebugCamera = new CameraDebug();
 	m_pPlayer = new Player();
+	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
+	g_pTimer = new Timer();
+	m_pBgm = LoadSound("Assets/sound/MainBgm.mp3",true);
+	m_pspeaker = PlaySound(m_pBgm);
+	m_pspeaker->SetVolume(0.5f);
+
+
+
+	//カメラの作成
+	m_pDebugCamera = new CameraDebug();
+	pCamMinimap = new CameraMinimap();
 	m_pStageObjectManager->SetPlayer(m_pPlayer);
 	m_pStageObjectManager->SetCamera(m_pDebugCamera);
 	m_pDebugCamera->SetPlayer(m_pPlayer);
 	m_pPlayer->SetCamera(m_pDebugCamera);
-	m_pPlayer->SetWall(m_pStageObjectManager->GetWall());
-	pCamMinimap = new CameraMinimap();
-	m_pCamera[CAM_PLAYER] = m_pDebugCamera;
-	m_pCamera[CAM_MINIMAP] = pCamMinimap;
-	g_pTimer = new Timer();
 
-	m_pBgm = LoadSound("Assets/sound/MainBgm.mp3",true);
-	m_pspeaker = PlaySound(m_pBgm);
-	m_pspeaker->SetVolume(0.5f);
 	// コンストラクタ（ミニマップオブジェクトの作成）
 	m_pMinimap = new Minimap();
-	pCamMinimap->SetPlayer(m_pPlayer);
+	pCamMinimap->SetPlayer(m_pPlayer);//カメラで追いかけるプライヤーを設定
 	m_pMinimap->SetCamera(pCamMinimap);
+
+	//配列に設定
+	m_pCamera[CAM_PLAYER] = m_pDebugCamera;
+	m_pCamera[CAM_MINIMAP] = pCamMinimap;
+
 }
 
 SceneGame::~SceneGame()
 {
 	SAFE_DELETE(m_pMinimap);
-	if (m_pCamera[0]) {
-		delete m_pCamera[0];
-		m_pCamera[0] = nullptr;
-	}
-	if(m_pCamera[1]){
-	delete m_pCamera[1];
-	m_pCamera[1] = nullptr;
+	for (int i = 0;i < 2; i++)
+	{
+		delete m_pCamera[i];
+		m_pCamera[i] = nullptr;
 	}
 	if (m_pModel) {
 		delete m_pModel;
@@ -85,7 +89,7 @@ SceneGame::~SceneGame()
 void SceneGame::Update()
 {
 
-
+	
 	m_pCamera[CAM_PLAYER]->Update();
 	if (StartFlag)
 	{
@@ -154,14 +158,6 @@ void SceneGame::Draw()
 		Sprite::Draw();
 	}
 
-
-
-
-
-
-
-
-
 	pRTV = GetDefaultRTV(); // RenderTargetView 
 	pDSV = GetDefaultDSV(); // DepthStencilView 
 	SetRenderTargets(1, &pRTV, pDSV);  // 3 null 2D表示になる
@@ -188,20 +184,13 @@ void SceneGame::Draw()
 	wvp[2] = m_pCamera[CAM_PLAYER]->GetProjectionMatrix();
 	// シェーダーへの変換行列を設定
 	ShaderList::SetWVP(wvp); 
-	//// モデルに使用する頂点シェーダー、ピクセルシェーダーを設定
-	//m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
-	//m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_TOON));
-
-	// 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
-	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
-	// 切り替える。
-	g_pTimer->Draw();
-
-	//  
-	m_pCamera[CAM_MINIMAP]->Update();   //  
-	m_pPlayer->SetCamera(m_pCamera[CAM_MINIMAP]); //  
 
 
+	//ミニマップ用カメラの更新
+	m_pCamera[CAM_MINIMAP]->Update();   //更新処理だが、描画で実行
+	m_pPlayer->SetCamera(m_pCamera[CAM_MINIMAP]); //  プレイヤーの表示にミニマップカメラを設定
+
+	//ミニマップ表示用の変換行列を取得
 	view4x4 = m_pCamera[CAM_MINIMAP]->GetViewMatrix();
 	proj4x4 = m_pCamera[CAM_MINIMAP]->GetProjectionMatrix();
 	Geometory::SetView(view4x4);
@@ -210,17 +199,31 @@ void SceneGame::Draw()
 	Sprite::SetProjection(proj4x4);
 
 	m_pMinimap->SetCamera(m_pCamera[CAM_MINIMAP]);
+	//ミニマップの作成開始
 	m_pMinimap->BeginRender();
 
-	m_pPlayer->Draw();
+	m_pPlayer->DrawMiniMapModel();
+	Geometory::DrawLines();
 
-
-	//  
+	//ミニマップの作成終了
 	m_pMinimap->EndRender();
-	m_pPlayer->SetCamera(m_pCamera[CAM_PLAYER]); //  
+	m_pPlayer->SetCamera(m_pCamera[CAM_PLAYER]); //プレイヤーで使用するカメラをもどす
 
-	// 2D 
+	// 2Dの表示
 	SetRenderTargets(1, &pRTV, nullptr);
 	m_pMinimap->Draw();
 	SetRenderTargets(1, &pRTV, pDSV);
+	view4x4 = m_pCamera[CAM_PLAYER]->GetViewMatrix();
+	proj4x4 = m_pCamera[CAM_PLAYER]->GetProjectionMatrix();
+	Geometory::SetView(view4x4);
+	Geometory::SetProjection(proj4x4);
+
+
+
+	// 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
+	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
+	// 切り替える。
+	g_pTimer->Draw();
+
+	
 }

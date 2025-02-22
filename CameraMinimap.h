@@ -4,10 +4,10 @@
 class CameraMinimap : public Camera {
 public:
     CameraMinimap();
-    virtual ~CameraMinimap() override {}
+    virtual ~CameraMinimap() override;
 
     void Update() override;
-
+    //ƒvƒŒƒCƒ„[‚Ìî•ñ‚ğİ’è
     void SetPlayer(Player* pPlayer) { m_pPlayer = pPlayer; }
 
 private:

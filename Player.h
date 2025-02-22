@@ -20,6 +20,7 @@ public:
     ~Player();
     void Update();  
     void Draw();
+    void DrawMiniMapModel();
     //ƒJƒƒ‰‚Ìİ’è
     void SetCamera(Camera* camera) { m_pCamera = camera; }
     void SetWall(std::vector <Wall*> InWall) { m_pWall = InWall; }

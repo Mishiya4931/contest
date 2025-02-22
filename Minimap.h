@@ -17,7 +17,7 @@ public:
 
     void SetCamera(Camera* InCamera) { m_pCamera = InCamera; }
 private:
-    RenderTarget* m_pRenderTarget;
-    DepthStencil* m_pDepthStencil;
+    RenderTarget* m_pRenderTarget;//　色情報書き込み先
+    DepthStencil* m_pDepthStencil;//　深度情報書き込み先
     Camera* m_pCamera;
 };

@@ -92,9 +92,9 @@ void TrashObject::Draw()
 
 	for (int i = 0; i < m_pModel->GetMeshNum(); ++i) {
 		//モデルのメッシュを取得
-		Model::Mesh mesh = *m_pModel->GetMesh(i);
+		const Model::Mesh* mesh = m_pModel->GetMesh(i);
 		//メッシュに割り当てられているマテリアル取得
-		Model::Material material = *m_pModel->GetMaterial(mesh.materialID);
+		Model::Material material = *m_pModel->GetMaterial(mesh->materialID);
 		//シェーダーへマテリアルを設定
 		material.ambient = { 0.8f,0.8f,0.8f,1.0f };
 		ShaderList::SetMaterial(material);
