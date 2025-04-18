@@ -128,9 +128,8 @@ void Player::Draw()
        DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
     S =
        DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-    R = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(m_Rotation.x)) *
-       DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(m_Rotation.z)) *
-       DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(m_Rotation.y)); // 回転
+    R = DirectX::XMMatrixRotationQuaternion(m_Quaternion);
+
     mat = S * R * T;
     DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
     wvp[1] = m_pCamera->GetViewMatrix();
@@ -313,11 +312,15 @@ void Player::UpdateMove()
     float yaw = DirectX::XMConvertToRadians(m_Rotation.z);
     float roll = DirectX::XMConvertToRadians(m_Rotation.y);
 
+    // クォータニオンを作る
+    m_Quaternion = DirectX::XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+
+    // クォータニオン → 回転行列へ変換（これによりジンバルロック回避）
     DirectX::XMMATRIX rotMatrix =
-        DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+        DirectX::XMMatrixRotationQuaternion(m_Quaternion);
 
     // 行列の z軸方向(row[2]) が forward になる
-    DirectX::XMVECTOR forward = rotMatrix.r[2]; // r[2] は (x, y, z, w)
+    DirectX::XMVECTOR forward = rotMatrix.r[2]; // r[2] は (x, y, "z", w)
     // 移動量+
     bool HitWallFlag = false;
     DirectX::XMVECTOR moveVec = DirectX::XMVectorScale(forward, MOVE_SPEED_BASE + m_fDashSpeed);

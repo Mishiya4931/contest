@@ -10,20 +10,7 @@ CameraDebug::~CameraDebug()
 
 void CameraDebug::Update()
 {
-	//注視点の移動 
-	//if (IsKeyPress(VK_UP)) { m_look.z += 1.0f; }
-	//if (IsKeyPress(VK_DOWN)) { m_look.z += -1.0f; }
-	//if (IsKeyPress(VK_LEFT)) { m_look.x += -1.0f; }
-	//if (IsKeyPress(VK_RIGHT)) { m_look.x += 1.0f; }
-	//if (IsKeyPress(VK_SHIFT)) { m_look.y += 1.0f; }
-	//if (IsKeyPress(VK_CONTROL)) { m_look.y += -1.0f; }
 
-	//if (IsKeyPress('A')) { m_radXZ += 1.0f; }
-	//if (IsKeyPress('D')) { m_radXZ += -1.0f; }
-	//if (IsKeyPress('W')) { m_radY += -1.0f; }
-	//if (IsKeyPress('S')) { m_radY += 1.0f; }
-	//if (IsKeyPress('Q')) { m_radius += -1.0f; }
-	//if (IsKeyPress('E')) { m_radius += 1.0f; }
 //  プレイヤー位置
 	m_look = m_pPlayer->GetPos();
 	XMFLOAT3 playerPos = m_pPlayer->GetPos();
@@ -31,12 +18,12 @@ void CameraDebug::Update()
 
 	float yaw = XMConvertToRadians(m_pPlayer->GetRotation().z);
 	float pitch = XMConvertToRadians(m_pPlayer->GetRotation().x);
-	//回転行列(Roll,Pitch,Yaw)
-	XMMATRIX rot = XMMatrixRotationRollPitchYaw(
-		pitch,  // 上下方向
-		yaw,    // 左右方向
-		0.0f
-	);
+
+	
+	// クォータニオン生成
+	XMVECTOR quat = XMQuaternionRotationRollPitchYaw(pitch, yaw, 0.0f);
+	// 回転行列に変換
+	XMMATRIX rot = XMMatrixRotationQuaternion(quat);
 
 	//カメラの位置(プレイヤーの後ろ)をoffsetBaseに格納
 	XMVECTOR offsetBase = XMVectorSet(0.0f, 1.0f, -m_radius, 0.0f);//x,y,z
@@ -56,4 +43,33 @@ void CameraDebug::Update()
 	//m_pos.y = sin(DirectX::XMConvertToRadians(m_radY)) * m_radius + m_look.y;
 	//m_pos.z = cos(DirectX::XMConvertToRadians(m_radY)) * cos(DirectX::XMConvertToRadians(m_radXZ)) * m_radius + m_look.z;
 
+}
+DirectX::XMFLOAT4X4 CameraDebug::GetViewMatrix(bool transpose)
+{
+	DirectX::XMFLOAT4X4 mat;
+
+	//プレイヤーの角度（クォータニオン回転用）
+	float pitch = XMConvertToRadians(m_pPlayer->GetRotation().x);
+	float yaw = XMConvertToRadians(m_pPlayer->GetRotation().z);
+	float roll = XMConvertToRadians(m_pPlayer->GetRotation().y);
+
+	//クォータニオン作成
+	XMVECTOR quat = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+	XMMATRIX rot = XMMatrixRotationQuaternion(quat);
+
+	//カメラ位置・注視点（＝プレイヤー）
+	XMVECTOR vEye = XMLoadFloat3(&m_pos);
+	XMVECTOR vTarget = XMLoadFloat3(&m_look);
+
+	//向き（forward）と up を回転行列から直接取り出す
+	XMVECTOR forward = XMVector3Normalize(XMVectorSubtract(vTarget, vEye));
+	XMVECTOR up = rot.r[1]; // クォータニオン由来のY軸
+	
+	XMMATRIX view = XMMatrixLookToLH(vEye, forward, up);
+
+	if (transpose) {
+		view = XMMatrixTranspose(view);
+	}
+	XMStoreFloat4x4(&mat, view);
+	return mat;
 }

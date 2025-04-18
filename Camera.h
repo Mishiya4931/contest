@@ -11,7 +11,7 @@ public:
 	//  更新処理（継承先のクラスで必ず実装）
 	virtual void Update() = 0;
 	//  ビュー行列の取得（デフォルトでは転置済みの行列を計算する）
-	DirectX::XMFLOAT4X4 GetViewMatrix(bool transpose = true);
+	virtual DirectX::XMFLOAT4X4 GetViewMatrix(bool transpose = true);
 	//プロジェクション行列の取得（デフォルトでは転置済みの行列を計算する）
 	DirectX::XMFLOAT4X4 GetProjectionMatrix(bool transpose = true);
 	//  座標の取得

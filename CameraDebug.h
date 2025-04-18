@@ -10,6 +10,7 @@ public:
 	~CameraDebug();
 	void Update()final;
 	void SetPlayer(Player* Inplayer) { m_pPlayer = Inplayer; }
+	DirectX::XMFLOAT4X4 GetViewMatrix(bool transpose =true)override;
 private:
 	Player* m_pPlayer;
 	float m_radXZ;

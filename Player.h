@@ -42,6 +42,7 @@ private:
     Texture* m_pEffectTexture;
     float m_power;
     std::vector <Wall*> m_pWall;
+    DirectX::XMVECTOR m_Quaternion;
     float m_fDashSpeed;
     bool m_bDashFlag;//ダッシュできるかどうか
     int m_nDashIntervalCnt;//ダッシュができるまで時間
