@@ -26,6 +26,7 @@ public:
     void SetWall(std::vector <Wall*> InWall) { m_pWall = InWall; }
     int GetItemNum() { return m_nItemCnt; }
     void SetItemNum(int InItemNum) { m_nItemCnt = InItemNum; }
+    DirectX::XMFLOAT3 GetPos() { return m_pos; }
 private:  
     void UpdateMove();
     void DrawUI();

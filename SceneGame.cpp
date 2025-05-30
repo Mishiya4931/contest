@@ -119,8 +119,8 @@ void SceneGame::Update()
 
 void SceneGame::Draw()
 {
-	m_pPlayer->Draw();
 	m_pStageObjectManager->Draw();
+	m_pPlayer->Draw();
 
 
 	RenderTarget* pRTV = GetDefaultRTV();// ディスプレイ情報の取得

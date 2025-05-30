@@ -13,6 +13,7 @@ Timer::Timer():m_nTimeCnt(INIT_TIMER)
 
 Timer::~Timer()
 {
+	delete m_pTexture;
 }
 
 void Timer::Update()

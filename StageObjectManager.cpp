@@ -8,6 +8,7 @@
 #include"ModelCache.h"
 #include"Model.h"
 #include"CameraDebug.h"
+#include"SkyDome.h"
 #define STAGE_OBJECT_NUMBER (40)
 StageObjectManager::StageObjectManager():
 	m_pPlayer(nullptr),
@@ -17,7 +18,10 @@ StageObjectManager::StageObjectManager():
 	{
 		MessageBox(NULL, "StageObjectManagerにプレイヤーがセットされていません", "エラー", MB_OK);
 	}
-	
+	//スカイドームの設置
+	m_pSkyDome = new SkyDome();
+
+
 	//=====ゴールの配置==========
 	m_pGoal = new Goal({ 0.0f, 5.0f, 0.0f });
 	
@@ -78,6 +82,7 @@ StageObjectManager::~StageObjectManager()
 	}
 	m_WallObjects.clear();
 	SAFE_DELETE(m_pGoal);
+	SAFE_DELETE(m_pSkyDome);
 }
 
 void StageObjectManager::Update()
@@ -120,6 +125,8 @@ void StageObjectManager::Update()
 		itr->Update();
 	}
 	m_pGoal->Update();
+	m_pSkyDome->SetPosition(m_pPlayer->GetPos());
+	m_pSkyDome->Update();
 }
 
 void StageObjectManager::Draw()
@@ -134,6 +141,8 @@ void StageObjectManager::Draw()
 	//	if (!itr)continue;//オブジェクトがあるかどうかチェック
 	//	itr->Draw();
 	//}
+	
+	m_pSkyDome->Draw();
 	m_pGoal->Draw();
 }
 
@@ -141,6 +150,7 @@ void StageObjectManager::SetCamera(CameraDebug* InCamera)
 {
 	m_pCamera = InCamera;
 	m_pGoal->SetCamera(InCamera);
+	m_pSkyDome->SetCamera(InCamera);
 	for (auto& itr : m_StageObjects)
 	{
 		itr->SetCamera(InCamera);

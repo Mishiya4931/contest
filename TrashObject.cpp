@@ -85,9 +85,6 @@ void TrashObject::Draw()
 	m_pModel->SetVertexShader(ShaderList::GetVS(ShaderList::VS_WORLD));
 	m_pModel->SetPixelShader(ShaderList::GetPS(ShaderList::PS_LAMBERT));
 
-	// 複数のメッシュで構成されている場合、ある部分は金属的な表現、ある部分は非金属的な表現と
-	// 分ける場合がある。前回の表示は同じマテリアルで一括表示していたため、メッシュごとにマテリアルを
-	// 切り替える。
 
 
 	for (int i = 0; i < m_pModel->GetMeshNum(); ++i) {

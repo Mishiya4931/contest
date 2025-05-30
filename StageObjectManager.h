@@ -7,6 +7,7 @@ class TrashObject;
 class Wall;
 class Goal;
 class Model;
+class SkyDome;
 class StageObjectManager
 {
 public:
@@ -24,6 +25,7 @@ private:
 	Player* m_pPlayer;
 	Goal* m_pGoal;
 	CameraDebug* m_pCamera;
+	SkyDome* m_pSkyDome;
 	IXAudio2SourceVoice* m_pSEspeaker;
 	XAUDIO2_BUFFER* m_pGetSe;
 };
