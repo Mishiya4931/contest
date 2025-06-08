@@ -12,6 +12,7 @@ int Score::cnt;
 #define SCORE_SPRITE_SPRIT_Y (2.0f)
 #define SCORE_SPRITE_POS_X (740.0f)
 #define SCORE_SPRITE_POS_Y (380.0f)
+#define SCORE_LIMIT (40)
 Score::Score():m_pTexture(nullptr)
 {
 	m_nScore = 0;
@@ -81,6 +82,7 @@ void Score::Update()
 		m_pSEspeaker = PlaySound(m_pDrumrollSe);
 		m_bDrumSoundFlag = false;
 	}
+	// スコア表示
 	if (cnt > 120)
 	{
 		m_pSEspeaker->Stop(0);
@@ -172,7 +174,7 @@ void Score::Draw()
 		Sprite::Draw();
 
 
-		int nScoreCorrect = 40 - m_nScore;
+		int nScoreCorrect = SCORE_LIMIT - m_nScore;
 
 
 		//一の位

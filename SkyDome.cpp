@@ -1,7 +1,8 @@
 #include "SkyDome.h"
-#include"ModelCache.h"
-#include"Model.h"
-#include"ShaderList.h"
+#include "ModelCache.h"
+#include "Model.h"
+#include "ShaderList.h"
+
 SkyDome::SkyDome():m_Scale{ 1.0f,1.0f,1.0f },m_pCamera(nullptr)
 {
 
@@ -31,9 +32,6 @@ void SkyDome::Draw()
 	DirectX::XMMATRIX mat = S * R * T;
 	DirectX::XMStoreFloat4x4(&wvp[0], DirectX::XMMatrixTranspose(mat));
 	////頂点シェーダーに渡す変換行列を作成
-	DirectX::XMMATRIX world, view, proj;
-	//DirectX::XMStoreFloat4x4(&wvp[1], DirectX::XMMatrixTranspose(view));
-	//DirectX::XMStoreFloat4x4(&wvp[2], DirectX::XMMatrixTranspose(proj));
 	wvp[1] = m_pCamera->GetViewMatrix();
 	wvp[2] = m_pCamera->GetProjectionMatrix();
 

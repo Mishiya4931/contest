@@ -439,7 +439,7 @@ void Player::OnCollisionWall()
         {
             switch (itr->GetNo())
             {
-            case WALL_INNER:
+            case WALL_FRONT:
                 m_pos.z = itr->GetCollision().center.z + (GetCollision().size.z + itr->GetCollision().size.z + COLLISION_CORRECT) * 0.5f * result.normal.z;
                 break;
             case WALL_UP:

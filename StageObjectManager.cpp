@@ -10,6 +10,7 @@
 #include"CameraDebug.h"
 #include"SkyDome.h"
 #define STAGE_OBJECT_NUMBER (40)
+#define GOAL_INIT_POSITION DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f)
 StageObjectManager::StageObjectManager():
 	m_pPlayer(nullptr),
 	m_pGoal(nullptr)
@@ -23,7 +24,7 @@ StageObjectManager::StageObjectManager():
 
 
 	//=====ゴールの配置==========
-	m_pGoal = new Goal({ 0.0f, 5.0f, 0.0f });
+	m_pGoal = new Goal(GOAL_INIT_POSITION);
 	
 
 	//=======オブジェクトの配置========
@@ -49,12 +50,12 @@ StageObjectManager::StageObjectManager():
 		DirectX::XMFLOAT3 Size;
 	};
 	WallIndex wallindex[6];//ボックス上に当たり判定
-	wallindex[WALL_INNER] = { {0.0f,5.0f,WALL_POSITION},{0.0f,0.0f,0.0f},{20.0f,10.0f,1.0f} };//奥
 	wallindex[WALL_UP] = { {0.0f,WALL_POSITION,0.0f},{0.0f,0.0f,0.0f},{20.0f,1.0f,20.0f} };//上
+	wallindex[WALL_DOWN] = { {0.0f,-0.5f,0.0f},{0.0f,0.0f,0.0f},{20.0f,1.0f,20.0f} };//下
 	wallindex[WALL_LEFT] = { {-WALL_POSITION,0.0f,0.0f},{0.0f,0.0f,0.0f},{1.0f,20.0f,20.0f} };//左
 	wallindex[WALL_RIGHT] = { {WALL_POSITION,0.0f,0.0f},{0.0f,0.0f,0.0f},{1.0f,20.0f,20.0f} };//右
-	wallindex[WALL_BACK] = { {0.0f,0.0f,-WALL_POSITION},{0.0f,0.0f,0.0f},{20.0f,20.0f,1.0f} };//手前
-	wallindex[WALL_DOWN] = { {0.0f,-0.5f,0.0f},{0.0f,0.0f,0.0f},{20.0f,1.0f,20.0f} };//下
+	wallindex[WALL_FRONT] = { {0.0f,5.0f,WALL_POSITION},{0.0f,0.0f,0.0f},{20.0f,10.0f,1.0f} };//前
+	wallindex[WALL_BACK] = { {0.0f,0.0f,-WALL_POSITION},{0.0f,0.0f,0.0f},{20.0f,20.0f,1.0f} };//後ろ
 
 	for (int i = 0; i < WALL_NUM; i++)
 	{
